@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ISP Billing Customer Portal</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .section-title {
+            margin-top: 40px;
+            text-align: center;
+            color: #555;
+        }
+
+        #current-subscription, #plans {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            padding: 20px;
+            width: 280px;
+            transition: transform 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card strong {
+            display: block;
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #007BFF;
+        }
+
+        .card p {
+            margin: 6px 0;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>ISP Billing Customer Portal</h1>
+
+    <div class="section-title"><h2>Your Current Subscription</h2></div>
+    <div id="current-subscription">Loading your subscription...</div>
+
+    <div class="section-title"><h2>Available Plans</h2></div>
+    <div id="plans">Loading subscription plans...</div>
+
+    <script>
+        async function loadCustomerSubscription() {
+            try {
+                const response = await fetch('/api/method/isp_billing.api.subscription.get_subscription_details');
+                const result = await response.json();
+
+                const container = document.getElementById('current-subscription');
+
+                if (result.message && result.message.length > 0) {
+                    container.innerHTML = '';
+                    result.message.forEach(sub => {
+                        const card = document.createElement('div');
+                        card.className = 'card';
+                        card.innerHTML = `
+                            <strong>Subscription ID: ${sub.name}</strong>
+                            <p><b>Status:</b> ${sub.status}</p>
+                            <p><b>Plan:</b> ${sub.plan}</p>
+                            <p><b>Quantity:</b> ${sub.qty}</p>
+                        `;
+                        container.appendChild(card);
+                    });
+                } else {
+                    container.innerText = 'No active subscription found.';
+                }
+            } catch (error) {
+                console.error('Error loading subscription:', error);
+                document.getElementById('current-subscription').innerText = 'Failed to load subscription.';
+            }
+        }
+
+        async function loadSubscriptionPlans() {
+            try {
+                const response = await fetch('/api/method/isp_billing.api.subscription.get_subscription_plans');
+                const result = await response.json();
+
+                const plansContainer = document.getElementById('plans');
+
+                if (result.message && result.message.length > 0) {
+                    plansContainer.innerHTML = '';
+
+                    result.message.forEach(plan => {
+                        const card = document.createElement('div');
+                        card.className = 'card';
+                        card.innerHTML = `
+                            <strong>${plan.plan_name}</strong>
+                            <p><b>Item:</b> ${plan.item}</p>
+                            <p><b>Cost:</b> ${plan.cost} ${plan.currency}</p>
+                            <p><b>Price Type:</b> ${plan.price_determination}</p>
+                        `;
+                        plansContainer.appendChild(card);
+                    });
+                } else {
+                    plansContainer.innerText = 'No subscription plans available.';
+                }
+            } catch (error) {
+                console.error('Error fetching subscription plans:', error);
+                document.getElementById('plans').innerText = 'Failed to load plans.';
+            }
+        }
+
+        loadCustomerSubscription();
+        loadSubscriptionPlans();
+    </script>
+
+</body>
+</html>

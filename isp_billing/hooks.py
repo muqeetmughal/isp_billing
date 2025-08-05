@@ -10,6 +10,23 @@ app_license = "mit"
 
 # required_apps = []
 
+
+
+fixtures = [
+    {
+        "dt": "Custom Field",
+        "filters": [
+            ["dt", "in", ["Customer", "Lead", "Issue"]]
+        ]
+    }
+
+]
+
+
+
+
+
+
 # Each item in the list will be shown as an app in the apps page
 # add_to_apps_screen = [
 # 	{
@@ -242,3 +259,5 @@ app_license = "mit"
 # 	"Logging DocType Name": 30  # days to retain logs
 # }
 
+
+website_route_rules = [{'from_route': '/frontend/<path:app_path>', 'to_route': 'frontend'},]
