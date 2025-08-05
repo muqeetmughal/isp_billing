@@ -4,7 +4,6 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import Home from "./pages/Home";
 import MainLayout from "./layouts/MainLayout";
 import Invoices from "./pages/Invoices";
-import SubscriptionPlans from "./pages/SubscriptionPlan";
 import SupportTicket from "./pages/SupportTicket";
 import Login from "./pages/Login";
 import PrivateRoute from "./component/PrivateRoute";
@@ -24,7 +23,6 @@ function App() {
               <Route path="/" element={<Navigate to="/dashboard" />} />
               <Route path="/dashboard" element={<Home />} />
               <Route path="/invoices" element={<Invoices />} />
-              <Route path="/subscription_plans" element={<SubscriptionPlans />} />
               <Route path="/subscription" element={<Subscription />} />
               <Route path="/support_tickets" element={<SupportTicket />} />
               <Route path="*" element={<>404 Not Found</>} />
