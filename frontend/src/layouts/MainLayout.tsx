@@ -1,6 +1,5 @@
 import {
   CreditCard,
-  Wifi,
   Bell,
   Activity,
   BadgeCheck,
@@ -11,6 +10,8 @@ import {
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { useFrappeAuth } from "frappe-react-sdk";
 import { useState } from "react";
+import cliSecureLogo from "../assets/clisecure logo.png";
+
 
 const CustomerPortal = () => {
   const auth = useFrappeAuth();
@@ -36,12 +37,12 @@ const CustomerPortal = () => {
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-3">
-                <div className="p-2 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg">
-                  <Wifi className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-bold text-gray-900">CLI SECURE</h1>
-                  <p className="text-sm text-gray-500">Customer Portal</p>
+                <div className=" ">
+                  <img
+                  src={cliSecureLogo}
+                  alt="CLI Secure Logo"
+                  className="w-20 h-14 object-contain"
+                  />
                 </div>
               </div>
             </div>
@@ -53,7 +54,7 @@ const CustomerPortal = () => {
               </button>
 
               <div className="flex items-center space-x-2 bg-gray-50 rounded-lg px-3 py-2">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center">
+                <div className="w-8 h-8 bg-gradient-to-br from-[#7d4fff] to-[#6c38fd] rounded-full flex items-center justify-center">
                   <span className="text-white text-sm font-medium">JS</span>
                 </div>
                 <span className="text-sm font-medium text-gray-700">{auth.currentUser}</span>
@@ -88,7 +89,7 @@ const CustomerPortal = () => {
               key={tab.id}
               className={`flex items-center space-x-2 py-4 px-1 border-b-2 font-medium text-sm transition-colors ${
                 activeTab.includes(tab.id)
-                  ? "border-blue-600 text-blue-600"
+                  ? "border-[#7d4fff] text-[#7d4fff]"
                   : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
               }`}
             >

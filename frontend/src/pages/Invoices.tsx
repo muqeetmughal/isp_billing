@@ -96,7 +96,7 @@ const Invoices = () => {
       {loading ? (
         <div className="flex items-center justify-center mt-20">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-2"></div>
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#7d4fff] mx-auto mb-2"></div>
             <p className="text-gray-500">Loading invoices...</p>
           </div>
         </div>
@@ -136,12 +136,12 @@ const Invoices = () => {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    {/* <button className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition-colors duration-200">
+                    {/* <button className="bg-[#7d4fff] text-white px-3 py-1 rounded hover:bg-blue-700 transition-colors duration-200">
                       View Details
                     </button> */}
 
                     <button
-                      className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition-colors duration-200"
+                      className="bg-[#7d4fff] text-white px-3 py-1 rounded hover:bg-blue-700 transition-colors duration-200"
                       onClick={() => {
                         setSelectedInvoice(invoice);
                         setViewModalOpen(true);
@@ -195,7 +195,7 @@ const Invoices = () => {
             <div className="mt-4 text-right">
               <button
                 onClick={() => setViewModalOpen(false)}
-                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                className="bg-[#7d4fff] text-white px-4 py-2 rounded hover:bg-blue-700"
               >
                 Close
               </button>

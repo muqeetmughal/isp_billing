@@ -18,6 +18,9 @@ fixtures = [
         "filters": [
             ["dt", "in", ["Customer", "Lead", "Issue"]]
         ]
+    },
+    {
+        "dt": "Web Form"
     }
 
 ]
@@ -161,6 +164,20 @@ fixtures = [
 # 		"on_trash": "method"
 # 	}
 # }
+
+
+doc_events = {
+    "Customer": {
+        "after_insert": "isp_billing.api.test.send_welcome_email"
+    },
+    "Payment": {
+        "on_update": "isp_billing.api.payment.on_update"
+    }
+}
+
+
+
+
 
 # Scheduled Tasks
 # ---------------

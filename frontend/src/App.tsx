@@ -8,6 +8,8 @@ import SupportTicket from "./pages/SupportTicket";
 import Login from "./pages/Login";
 import PrivateRoute from "./component/PrivateRoute";
 import Subscription from "./pages/Subscription";
+import AdminDashboard from "./pages/admin_dashboard";
+import Success from "./pages/success";
 
 function App() {
   return (
@@ -25,6 +27,8 @@ function App() {
               <Route path="/invoices" element={<Invoices />} />
               <Route path="/subscription" element={<Subscription />} />
               <Route path="/support_tickets" element={<SupportTicket />} />
+              <Route path="/admin_dashboard" element={<AdminDashboard/>}/>
+              <Route path="/success" element={<Success/>}/>
               <Route path="*" element={<>404 Not Found</>} />
             </Route>
           </Route>

@@ -1,0 +1,122 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-08-13 13:40:06.176932",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_59kg",
+  "amended_from",
+  "customer",
+  "subscription_plan",
+  "payment_link",
+  "column_break_bswl",
+  "start_date",
+  "end_date",
+  "payment_tab",
+  "amount",
+  "status",
+  "stripe_payment_id",
+  "stripe_client_id"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_59kg",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "amended_from",
+   "fieldtype": "Link",
+   "label": "Amended From",
+   "no_copy": 1,
+   "options": "Subscription Enhancement",
+   "print_hide": 1,
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "subscription_plan",
+   "fieldtype": "Table",
+   "label": "Subscription Plan",
+   "options": "Subscription Plan Detail"
+  },
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "payment_link",
+   "fieldtype": "Small Text",
+   "label": "Payment Link"
+  },
+  {
+   "fieldname": "column_break_bswl",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "start_date",
+   "fieldtype": "Date",
+   "label": "Start Date"
+  },
+  {
+   "fieldname": "end_date",
+   "fieldtype": "Date",
+   "label": "End Date"
+  },
+  {
+   "fieldname": "payment_tab",
+   "fieldtype": "Tab Break",
+   "label": "Payment"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Pending\nPaid\nCancelled"
+  },
+  {
+   "fieldname": "stripe_payment_id",
+   "fieldtype": "Data",
+   "label": "Stripe Payment ID"
+  },
+  {
+   "fieldname": "stripe_client_id",
+   "fieldtype": "Data",
+   "label": "Stripe Client ID"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "is_submittable": 1,
+ "links": [],
+ "modified": "2025-08-15 20:08:24.758222",
+ "modified_by": "Administrator",
+ "module": "Isp Billing",
+ "name": "Subscription Enhancement",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

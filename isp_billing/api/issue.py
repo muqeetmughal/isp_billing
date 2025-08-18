@@ -139,3 +139,24 @@ def get_sales_invoice_details(invoice_number):
         "grand_total": invoice[0].grand_total,
         "status": invoice[0].status
     }
+
+
+
+
+
+
+
+
+
+import frappe
+@frappe.whitelist()
+def rename_item(old_item_code, new_item_code, merge=False):
+    
+    frappe.rename_doc(
+        doctype="Item",
+        old=old_item_code,
+        new=new_item_code,
+        merge=merge  
+    )
+    frappe.db.commit()
+    print(f"Item renamed from {old_item_code} to {new_item_code}")

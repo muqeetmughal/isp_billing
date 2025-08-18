@@ -5,20 +5,44 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "admin_email"
+  "admin_email",
+  "section_break_jlsl",
+  "stripe_secret_key",
+  "column_break_vbpg",
+  "stripe_publish_key"
  ],
  "fields": [
   {
    "fieldname": "admin_email",
    "fieldtype": "Data",
    "label": "Admin Email"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_jlsl",
+   "fieldtype": "Section Break",
+   "label": "Stripe Credentials"
+  },
+  {
+   "fieldname": "stripe_secret_key",
+   "fieldtype": "Data",
+   "label": "Stripe Secret Key"
+  },
+  {
+   "fieldname": "column_break_vbpg",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "stripe_publish_key",
+   "fieldtype": "Data",
+   "label": "Stripe Publish Key"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-07-31 15:53:55.399835",
+ "modified": "2025-08-12 21:16:42.448794",
  "modified_by": "Administrator",
  "module": "Isp Billing",
  "name": "Isp Billing Setting",

@@ -1,0 +1,88 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-08-13 12:54:02.026331",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "customer",
+  "amount",
+  "status",
+  "column_break_uluz",
+  "stripe_payment_id",
+  "stripe_client_id",
+  "subscription",
+  "subscription_plan"
+ ],
+ "fields": [
+  {
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer"
+  },
+  {
+   "fieldname": "amount",
+   "fieldtype": "Currency",
+   "label": "Amount"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "Paid\nCancelled\nPending\nFailed"
+  },
+  {
+   "fieldname": "column_break_uluz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "stripe_payment_id",
+   "fieldtype": "Data",
+   "label": "Stripe Payment ID"
+  },
+  {
+   "fieldname": "stripe_client_id",
+   "fieldtype": "Data",
+   "label": "Stripe Client ID"
+  },
+  {
+   "fieldname": "subscription",
+   "fieldtype": "Link",
+   "label": "Subscription",
+   "options": "Subscription"
+  },
+  {
+   "fieldname": "subscription_plan",
+   "fieldtype": "Link",
+   "label": "Subscription Plan",
+   "options": "Subscription Plan"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "links": [],
+ "modified": "2025-08-13 13:36:20.903225",
+ "modified_by": "Administrator",
+ "module": "Isp Billing",
+ "name": "Payment",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
