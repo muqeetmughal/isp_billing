@@ -518,7 +518,7 @@ const AdminDashboard = () => {
     const fetchCustomers = async () => {
       try {
         setLoading(true);
-        const response = await fetch("/api/method/isp_billing.api.test.get_customer");
+        const response = await fetch("/api/method/isp_billing.api.subscription.get_customer");
         const data = await response.json();
         setCustomers(data.message || []);
       } catch (error) {

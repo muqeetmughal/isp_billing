@@ -3,6 +3,77 @@ import frappe
 from frappe.query_builder import DocType
 
 
+
+
+@frappe.whitelist(allow_guest=True)
+def get_customer():
+    Customer = DocType("Customer")
+    
+    customers = (
+        frappe.qb.from_(Customer)
+            .select(
+                Customer.name,
+                Customer.customer_name, 
+                Customer.custom_email,
+                Customer.custom_mobile_no,
+                Customer.custom_billing_email,
+                Customer.custom_partner,
+                Customer.custom_billing_type,
+                Customer.custom_city,
+                Customer.custom_portal_login,
+                Customer.custom_portal_password,
+                Customer.custom_location,
+                Customer.custom_date_added,
+                Customer.custom_street,
+                Customer.custom_zip_code,
+                Customer.custom_reseller,
+                Customer.custom_company,
+                Customer.custom_agent,
+                Customer.custom_identification,
+                Customer.custom_date_of_birth,
+                Customer.custom_hotspot_mac
+                )
+            .run(as_dict=True)
+    )
+    return customers
+
+
+
+
+
+
+@frappe.whitelist(allow_guest=True)
+def get_customer_by_email(email):
+    Customer = DocType("Customer")
+    query = (
+        frappe.qb.from_(Customer)
+            .select(
+                Customer.name,
+                Customer.customer_name,
+                Customer.custom_email,
+            )
+            .where(Customer.custom_email == email)
+    ).run(as_dict=True)
+    return query
+
+@frappe.whitelist()
+def get_customer_name_by_email(email):
+    result = get_customer_by_email(email)
+    if result and len(result) > 0:
+        return result[0].get("name")   # return Customer.name
+    else:
+        return("Customer not found for this email")
+
+
+
+
+
+
+
+
+
+
+
 @frappe.whitelist()
 def get_subscription_details(email):
     Subscription = DocType("Subscription")
@@ -126,7 +197,7 @@ def create_subscription_from_plan_api(customer, start_date, end_date, plan_detai
 
 
 @frappe.whitelist(allow_guest=True)
-def send_subscription_email(enhancement_id):
+def send_payment_link_email(enhancement_id):
 
     # get Subscription Enhancement doc
     doc = frappe.get_doc("Subscription Enhancement", enhancement_id)
@@ -233,6 +304,13 @@ def payment_success(enhancement_id):
                     qty=plan["qty"]
                 )
                 created_subscriptions.append(result["subscription"])
+        customer_email = frappe.db.get_value("Customer", customer, "custom_email")
+        if customer_email:
+            frappe.sendmail(
+            recipients=[customer_email],
+            subject="Payment Confirmation",
+            message=f"Dear {customer},<br>Your payment for enhancement {enhancement_id} has been received successfully."
+            )
 
         frappe.local.response.http_status_code = 200
         return {
@@ -248,95 +326,6 @@ def payment_success(enhancement_id):
             "msg": "An error occurred while processing payment.",
             "success": False
         }
-
-
-# def payment_success(enhancement_id):
-    
-#     if not enhancement_id:
-#         frappe.local.response.http_status_code = 400
-#         return {
-#             "msg": "Enhancement ID is required.",
-#             "success": False
-#         }
-
-#     try:
-#         # Load the document
-#         enhancement_doc = frappe.get_doc("Subscription Enhancement", enhancement_id)
-
-#         # Check if already paid
-#         if enhancement_doc.status == "Paid":
-#             frappe.local.response.http_status_code = 409
-#             return {
-#                 "msg": "Payment is already marked as Paid.",
-#                 "success": False
-#             }
-
-#         # Mark as Paid
-#         enhancement_doc.db_set("status", "Paid")
-
-#         # ✅ Fetch enhancement details
-#         enhancements = get_subscription_enhancement(enhancement_id)
-
-#         if not enhancements:
-#             frappe.local.response.http_status_code = 404
-#             return {
-#                 "msg": "Enhancement details not found.",
-#                 "success": False
-#             }
-
-#         created_subscriptions = []
-#         created_invoices = []
-
-#         for enhancement in enhancements:
-#             customer = enhancement["customer"]
-#             start_date = enhancement["start_date"]
-#             end_date = enhancement["end_date"]
-
-#             for plan in enhancement["plans"]:
-#                 result = add_plan_in_subscription(
-#                     party=customer,
-#                     plan=plan["plan"],
-#                     start_date=start_date,
-#                     end_date=end_date,
-#                     qty=plan["qty"]
-#                 )
-#                 subscription_name = result["subscription"]
-#                 created_subscriptions.append(subscription_name)
-
-#                 # ✅ Load the created subscription
-#                 subscription_doc = frappe.get_doc("Subscription", subscription_name)
-
-#                 # Ensure subscription is saved before invoice
-#                 subscription_doc.save(ignore_permissions=True)
-
-#                 # ✅ Use Subscription’s built-in method to create invoice
-#                 if hasattr(subscription_doc, "create_invoice"):
-#                     invoice = subscription_doc.create_invoice()
-#                     invoice.name = None
-#                     invoice.insert(ignore_permissions=True)
-#                     invoice.submit()
-#                     # created_invoices.append(invoice.name)
-#                 else:
-#                     frappe.log_error(
-#                         f"Subscription {subscription_name} has no create_invoice method."
-#                     )
-
-#         frappe.local.response.http_status_code = 200
-#         return {
-#             "msg": "Payment marked as Paid, Subscriptions and Invoices created successfully.",
-#             "subscriptions": created_subscriptions,
-#             "invoices": created_invoices,
-#             "success": True
-#         }
-
-#     except Exception as e:
-#         frappe.log_error(f"Error in payment_success: {frappe.get_traceback()}")
-#         frappe.local.response.http_status_code = 500
-#         return {
-#             "msg": "An error occurred while processing payment.",
-#             "success": False
-#         }
-
 
 
 def get_subscription_enhancement(enhancement_id):
@@ -406,6 +395,73 @@ def add_plan_in_subscription(party, plan, start_date, end_date, qty):
         "subscription": doc.name,
         "success": True
     }
+
+
+
+
+
+
+
+#create sales_invoice and payment entry when subscription is added
+def create_sales_invoice_from_subscription(doc, method):
+    """Create Sales Invoice when a new Subscription is created"""
+
+    if not doc.plans:
+        frappe.throw("No Subscription Plans linked with this Subscription")
+
+    invoice = frappe.new_doc("Sales Invoice")
+    invoice.customer = doc.party  # customer comes from subscription.party
+    invoice.due_date = frappe.utils.nowdate()
+    invoice.company = doc.company
+
+    # Loop over subscription's plans
+    for plan_row in doc.plans:
+        plan = frappe.get_doc("Subscription Plan", plan_row.plan)
+
+        if not plan.item:
+            frappe.throw(f"Subscription Plan {plan.name} has no Item linked")
+
+        # Add item from subscription plan
+        invoice.append("items", {
+            "item_code": plan.item,
+            "qty": plan_row.qty or 1,
+            "rate": plan.cost or 0
+        })
+
+    invoice.insert(ignore_permissions=True)
+
+    # Submit automatically if required
+    if doc.submit_invoice:
+        invoice.submit()
+
+        # 🔹 Create Payment Entry against this invoice
+        payment_entry = frappe.get_doc({
+            "doctype": "Payment Entry",
+            "payment_type": "Receive",
+            "company": invoice.company,
+            "posting_date": frappe.utils.nowdate(),
+            "party_type": "Customer",
+            "party": invoice.customer,
+            "paid_amount": invoice.rounded_total or invoice.grand_total,
+            "received_amount": invoice.rounded_total or invoice.grand_total,
+            "paid_to": frappe.get_cached_value("Company", invoice.company, "default_receivable_account"),
+            "references": [
+                {
+                    "reference_doctype": "Sales Invoice",
+                    "reference_name": invoice.name,
+                    "total_amount": invoice.rounded_total or invoice.grand_total,
+                    "outstanding_amount": invoice.rounded_total or invoice.grand_total,
+                    "allocated_amount": invoice.rounded_total or invoice.grand_total,
+                }
+            ]
+        })
+        payment_entry.insert(ignore_permissions=True)
+        payment_entry.submit()
+
+        frappe.msgprint(f"Payment Entry {payment_entry.name} created for Sales Invoice {invoice.name}")
+
+    frappe.msgprint(f"Sales Invoice {invoice.name} created for Subscription {doc.name}")
+
 
 
 

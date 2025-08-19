@@ -28,7 +28,7 @@ function App() {
               <Route path="/subscription" element={<Subscription />} />
               <Route path="/support_tickets" element={<SupportTicket />} />
               <Route path="/admin_dashboard" element={<AdminDashboard/>}/>
-              <Route path="/success" element={<Success/>}/>
+              <Route path="/success/:id" element={<Success/>}/>
               <Route path="*" element={<>404 Not Found</>} />
             </Route>
           </Route>

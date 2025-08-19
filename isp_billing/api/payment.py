@@ -97,63 +97,17 @@ def confirm_payment(payment_intent_id):
 
 
 @frappe.whitelist(allow_guest=True)
-# def create_stripe_checkout_link(amount, customer_email, record_id="1122", record_type="subscription"):
-
-#     try:
-#         stripe_client = get_stripe_client()
-
-#         # Construct success and cancel URLs dynamically
-#         base_url = frappe.utils.get_url()
-#         success_url = f"{base_url}/frontend/success?{record_type}_id={record_id}"
-#         cancel_url = f"{base_url}/frontend/cancel?{record_type}_id={record_id}"
-
-#         # success_url = f"localhost:8080/frontend/success"
-#         # cancel_url = f"localhost:8080/frontend/cancel"
-
-#         # Create Stripe Checkout Session
-#         session = stripe_client.checkout.Session.create(
-#             payment_method_types=['card'],
-#             line_items=[{
-#                 'price_data': {
-#                     'currency': 'usd',
-#                     'product_data': {
-#                         'name': f'{record_type.capitalize()} - {record_id}',
-#                     },
-#                     'unit_amount': int(float(amount) * 100),  # amount in cents
-#                 },
-#                 'quantity': 1,
-#             }],
-#             mode='payment',
-#             customer_email=customer_email,
-#             success_url=success_url,
-#             cancel_url=cancel_url,
-#             metadata={
-#                 f"{record_type}_id": record_id
-#             }
-#         )
-
-#         return {
-#             "checkout_url": session.url,
-#             "session_id": session.id,
-#             "success": True
-#         }
-
-#     except Exception as e:
-#         frappe.log_error(f"Stripe Checkout creation failed for {record_type} {record_id}: {e}")
-#         frappe.local.response.http_status_code = 500
-#         return {
-#             "msg": _(f"Failed to create Stripe Checkout for {record_type} {record_id}."),
-#             "success": False
-#         }
-
-
 def create_stripe_checkout_link(amount, customer_email, enhancement_id):
     try:
         stripe_client = get_stripe_client()
 
         # Use fixed URLs
-        success_url = "http://localhost:8080/frontend/success"
-        cancel_url = "http://localhost:8080/frontend/cancel"
+        # success_url = "http://localhost:8080/frontend/success/{`enhancement_id`}"
+        # cancel_url = "http://localhost:8080/frontend/cancel/{enhancement_id}"
+
+        success_url = f"http://localhost:8080/frontend/success/{enhancement_id}"
+        cancel_url = f"http://localhost:8080/frontend/cancel/{enhancement_id}"
+
 
         # Create Stripe Checkout Session
         session = stripe_client.checkout.Session.create(

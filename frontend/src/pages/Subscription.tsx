@@ -87,7 +87,7 @@ const Subscription = () => {
   try {
     // fetch customer name by email
     const customerRes = await axios.get(
-      "/api/method/isp_billing.api.test.get_customer_name_by_email",
+      "/api/method/isp_billing.api.subscription.get_customer_name_by_email",
       { params: { email: currentUser } }
     );
     const customerName = customerRes.data.message;

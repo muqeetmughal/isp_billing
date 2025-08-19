@@ -13,7 +13,7 @@ frappe.ui.form.on("Subscription Enhancement", {
     after_save: function(frm) {
         if (frm.doc.docstatus === 1) {  // only after Submit
             frappe.call({
-                method: "isp_billing.api.subscription.send_subscription_email", 
+                method: "isp_billing.api.subscription.send_payment_link_email", 
                 args: {
                     enhancement_id: frm.doc.name
                 },

@@ -4,104 +4,6 @@ from frappe.query_builder import DocType
 
 
 
-
-
-@frappe.whitelist()
-def get_customer_name_by_email(email):
-    result = get_customer_by_email(email)
-    if result and len(result) > 0:
-        return result[0].get("name")   # return Customer.name
-    else:
-        return("Customer not found for this email")
-
-
-
-
-@frappe.whitelist(allow_guest=True)
-def get_customer_by_email(email):
-    Customer = DocType("Customer")
-    query = (
-        frappe.qb.from_(Customer)
-            .select(
-                Customer.name,
-                Customer.customer_name,
-                Customer.custom_email,
-            )
-            .where(Customer.custom_email == email)
-    ).run(as_dict=True)
-    return query
-
-
-
-
-@frappe.whitelist(allow_guest=True)
-def get_sales_invoice():
-    SalesInvoice = DocType("Sales Invoice")
-    Customer = DocType("Customer")
-    
-    query = (
-        frappe.qb.from_(SalesInvoice)
-            .join(Customer)
-            .on(SalesInvoice.customer == Customer.name)
-            .select(
-                SalesInvoice.name, 
-                SalesInvoice.customer, 
-                SalesInvoice.company, 
-                SalesInvoice.currency, 
-                SalesInvoice.grand_total,
-                SalesInvoice.posting_date,
-                SalesInvoice.status
-            )
-    )
-    sales_invoices = query.run(as_dict=True)
-    return sales_invoices
-
-
-
-
-
-
-@frappe.whitelist(allow_guest=True)
-def get_customer():
-    Customer = DocType("Customer")
-    
-    customers = (
-        frappe.qb.from_(Customer)
-            .select(
-                Customer.name,
-                Customer.customer_name, 
-                Customer.custom_email,
-                Customer.custom_mobile_no,
-                Customer.custom_billing_email,
-                Customer.custom_partner,
-                Customer.custom_billing_type,
-                Customer.custom_city,
-                Customer.custom_portal_login,
-                Customer.custom_portal_password,
-                Customer.custom_location,
-                Customer.custom_date_added,
-                Customer.custom_street,
-                Customer.custom_zip_code,
-                Customer.custom_reseller,
-                Customer.custom_company,
-                Customer.custom_agent,
-                Customer.custom_identification,
-                Customer.custom_date_of_birth,
-                Customer.custom_hotspot_mac
-                )
-            .run(as_dict=True)
-    )
-    return customers
-
-
-
-
-
-
-
-
-
-
 def send_welcome_email(doc, method):
    
     welcome_email_template = frappe.get_doc("Email Template", "Welcome Email")
@@ -206,4 +108,17 @@ def get_subscription_enhancement(enhancement_id):
         })
 
     return list(subscription_enhancement.values())
+
+
+
+
+
+
+
+
+
+
+
+
+
 

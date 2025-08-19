@@ -170,9 +170,14 @@ doc_events = {
     "Customer": {
         "after_insert": "isp_billing.api.test.send_welcome_email"
     },
-    "Payment": {
+    "Subscription Enhancement": {
         "on_update": "isp_billing.api.payment.on_update"
-    }
+    },
+    
+    # "Subscription": {
+    #     "after_insert": "isp_billing.api.subscription.create_sales_invoice_from_subscription"
+    # }
+
 }
 
 
