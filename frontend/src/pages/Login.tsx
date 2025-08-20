@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useFrappeAuth } from "frappe-react-sdk";
 import { useNavigate } from "react-router-dom";
+import cliSecureLogo from "../assets/clisecure logo.png";
 
 const Login = () => {
   const [username, setUsername] = useState<string>("");
@@ -12,26 +13,14 @@ const Login = () => {
 
   useEffect(() => {
     if (currentUser) {
-      // Check if user has ANY role checked
-      const admin = "salmansaeed7272@gmail.com";
-
-      if (admin === currentUser) {
-        navigate("/admin_dashboard");
-      }
-      else if (admin !== currentUser) {
-        navigate("/dashboard");
-      } else {
-        navigate("/");
-      }
+      navigate("/");
     }
   }, [currentUser, navigate]);
 
   const onLogin = () => {
     setLoginError(undefined);
     login({ username, password })
-      .then(() => {
-        // Redirect handled in useEffect
-      })
+      .then(() => {})
       .catch(() => {
         setLoginError("Invalid username or password.");
       });
@@ -47,52 +36,58 @@ const Login = () => {
           </div>
         </div>
       )}
+      <form className="w-full max-w-md p-8 relative z-0" action={onLogin} method="POST">
+        <div className="w-full max-w-md bg-white shadow-md rounded-lg p-8 relative z-0">
+          <img
+            src={cliSecureLogo}
+            alt="CLI Secure Logo"
+            className="w-20 h-14 object-contain mx-auto"
+          />
+          <h2 className="text-2xl font-semibold text-center text-gray-800 mb-8">
+            Login to CLI Secure Portal
+          </h2>
 
-      <div className="w-full max-w-md bg-white shadow-md rounded-lg p-8 relative z-0">
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">
-          Login
-        </h2>
+          {loginError && (
+            <div className="bg-red-100 text-red-700 p-3 rounded mb-4 text-sm border border-red-300">
+              {loginError}
+            </div>
+          )}
 
-        {loginError && (
-          <div className="bg-red-100 text-red-700 p-3 rounded mb-4 text-sm border border-red-300">
-            {loginError}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700">
+              Username/Email
+            </label>
+            <input
+              type="text"
+              placeholder="Enter your username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring focus:ring-blue-200"
+            />
           </div>
-        )}
 
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">
-            Username/Email
-          </label>
-          <input
-            type="text"
-            placeholder="Enter your username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring focus:ring-blue-200"
-          />
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700">
+              Password
+            </label>
+            <input
+              type="password"
+              placeholder="Enter your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring focus:ring-blue-200"
+            />
+          </div>
+
+          <button
+            onClick={onLogin}
+            disabled={isLoading}
+            className="w-full bg-[#7d4fff] text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
+          >
+            {isLoading ? "Logging in..." : "Login"}
+          </button>
         </div>
-
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700">
-            Password
-          </label>
-          <input
-            type="password"
-            placeholder="Enter your password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring focus:ring-blue-200"
-          />
-        </div>
-
-        <button
-          onClick={onLogin}
-          disabled={isLoading}
-          className="w-full bg-[#7d4fff] text-white py-2 rounded hover:bg-blue-700 disabled:opacity-50"
-        >
-          {isLoading ? "Logging in..." : "Login"}
-        </button>
-      </div>
+      </form>
     </div>
   );
 };

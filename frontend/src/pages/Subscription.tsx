@@ -2,29 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useFrappeAuth } from "frappe-react-sdk";
 import { CrossIcon } from "lucide-react";
-
-interface PlanDetail {
-  plan: string;
-  qty: number;
-  cost: number;
-}
-
-interface SubscriptionType {
-  name: string;
-  party_type: string;
-  party: string;
-  status: string;
-  plans: PlanDetail[];
-}
-
-interface SubscriptionPlan {
-  name: string;
-  cost: number;
-  currency: string;
-  item: string;
-  features?: string[];
-  price_determination: string;
-}
+import type { PlanDetail, SubscriptionPlan, SubscriptionType } from "../Data/globle";
 
 const Subscription = () => {
   const { currentUser } = useFrappeAuth();

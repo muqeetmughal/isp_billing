@@ -1,22 +1,12 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useFrappeAuth } from "frappe-react-sdk";
+import type { SupportTicketData } from "../Data/globle";
 
-interface SupportTicket {
-  name: string;
-  customer: string;
-  subject: string;
-  description: string;
-  status: string;
-  priority: string;
-  custom_group: string;
-  custom_type: string;
-  custom_assigned_to: string;
-  custom_watchers: string;
-}
+
 
 const SupportTicket = () => {
-  const [issues, setIssues] = useState<SupportTicket[]>([]);
+  const [issues, setIssues] = useState<SupportTicketData[]>([]);
   const [subject, setSubject] = useState("");
   const [description, setDescription] = useState("");
   const [customer, setCustomer] = useState("");
@@ -30,7 +20,7 @@ const SupportTicket = () => {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(
+  const [selectedTicket, setSelectedTicket] = useState<SupportTicketData | null>(
     null
   );
   const [viewModalOpen, setViewModalOpen] = useState(false);
@@ -365,60 +355,121 @@ const SupportTicket = () => {
       )}
 
       {viewModalOpen && selectedTicket && (
-        <div className="fixed inset-0 bg-black/20 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">Ticket Details</h2>
-              <button
-                onClick={() => setViewModalOpen(false)}
-                className="text-xl font-bold text-gray-600 cursor-pointer"
-              >
-                ×
-              </button>
-            </div>
-            <div className="space-y-2 text-sm text-gray-700">
-              <p>
-                <strong>ID:</strong> {selectedTicket.name}
-              </p>
-              <p>
-                <strong>Customer:</strong> {selectedTicket.customer}
-              </p>
-              <p>
-                <strong>Subject:</strong> {selectedTicket.subject}
-              </p>
-              <p>
-                <strong>Description:</strong> {selectedTicket.description}
-              </p>
-              <p>
-                <strong>Status:</strong> {selectedTicket.status}
-              </p>
-              <p>
-                <strong>Priority:</strong> {selectedTicket.priority}
-              </p>
-              <p>
-                <strong>Group:</strong> {selectedTicket.custom_group}
-              </p>
-              <p>
-                <strong>Type:</strong> {selectedTicket.custom_type}
-              </p>
-              <p>
-                <strong>Assigned To:</strong>{" "}
-                {selectedTicket.custom_assigned_to}
-              </p>
-              <p>
-                <strong>Watchers:</strong> {selectedTicket.custom_watchers}
-              </p>
-            </div>
-            <div className="mt-4 text-right">
-              <button
-                onClick={() => setViewModalOpen(false)}
-                className="bg-[#7d4fff] text-white py-2 px-4 rounded hover:bg-[#6c38fa]"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+  <div
+    className="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl w-full max-w-xl max-h-[90vh] overflow-y-auto 
+               p-6 animate-[fadeIn_0.25s_ease-out]"
+  >
+    {/* Header */}
+    <div className="flex justify-between items-center border-b pb-3 mb-4">
+      <h2 className="text-2xl font-semibold text-gray-800">🎫 Ticket Details</h2>
+      <button
+        onClick={() => setViewModalOpen(false)}
+        className="text-gray-500 hover:text-gray-800 text-2xl leading-none"
+      >
+        ×
+      </button>
+    </div>
+
+    {/* Content */}
+    <div className="space-y-4 text-sm">
+      <div className="flex justify-between">
+        <span className="font-medium text-gray-600">ID</span>
+        <span className="text-gray-900">{selectedTicket.name}</span>
+      </div>
+
+      <div className="flex justify-between">
+        <span className="font-medium text-gray-600">Customer</span>
+        <span className="text-gray-900">{selectedTicket.customer}</span>
+      </div>
+
+      <div className="flex justify-between">
+        <span className="font-medium text-gray-600">Subject</span>
+        <span className="text-gray-900">{selectedTicket.subject}</span>
+      </div>
+
+      <div>
+        <span className="font-medium text-gray-600">Description</span>
+        <p className="text-gray-900 mt-1 bg-gray-50 rounded-lg p-3 text-sm leading-relaxed">
+          {selectedTicket.description}
+        </p>
+      </div>
+
+      <div className="flex justify-between items-center">
+        <span className="font-medium text-gray-600">Status</span>
+        <span
+          className={`px-3 py-1 rounded-full text-xs font-semibold ${
+            selectedTicket.status === "Open"
+              ? "bg-green-100 text-green-700"
+              : selectedTicket.status === "Closed"
+              ? "bg-gray-200 text-gray-700"
+              : "bg-yellow-100 text-yellow-700"
+          }`}
+        >
+          {selectedTicket.status}
+        </span>
+      </div>
+
+      <div className="flex justify-between items-center">
+        <span className="font-medium text-gray-600">Priority</span>
+        <span
+          className={`px-3 py-1 rounded-full text-xs font-semibold ${
+            selectedTicket.priority === "High"
+              ? "bg-red-100 text-red-700"
+              : selectedTicket.priority === "Medium"
+              ? "bg-orange-100 text-orange-700"
+              : "bg-blue-100 text-blue-700"
+          }`}
+        >
+          {selectedTicket.priority}
+        </span>
+      </div>
+
+      <div className="flex justify-between">
+        <span className="font-medium text-gray-600">Group</span>
+        <span className="text-gray-900">{selectedTicket.custom_group}</span>
+      </div>
+
+      <div className="flex justify-between">
+        <span className="font-medium text-gray-600">Type</span>
+        <span className="text-gray-900">{selectedTicket.custom_type}</span>
+      </div>
+
+      <div className="flex justify-between">
+        <span className="font-medium text-gray-600">Assigned To</span>
+        <span className="text-gray-900">
+          {selectedTicket.custom_assigned_to}
+        </span>
+      </div>
+
+      <div>
+        <span className="font-medium text-gray-600">Watchers</span>
+        <p className="text-gray-900 mt-1">{selectedTicket.custom_watchers}</p>
+      </div>
+    </div>
+
+    {/* Footer */}
+    <div className="mt-6 text-right">
+      <button
+        onClick={() => setViewModalOpen(false)}
+        className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-5 py-2.5 rounded-xl shadow hover:opacity-90 transition"
+      >
+        Close
+      </button>
+    </div>
+  </div>
+
+  {/* Tailwind keyframes */}
+  <style>
+    {`
+      @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+      }
+    `}
+  </style>
+</div>
+
       )}
 
       {/* Issue Table */}
@@ -430,85 +481,6 @@ const SupportTicket = () => {
           </div>
         </div>
       ) : issues.length > 0 ? (
-        // <div className="bg-white rounded-lg shadow overflow-auto">
-        //   <table className="min-w-full divide-y divide-gray-200">
-        //     <thead className="bg-gray-100">
-        //       <tr>
-        //         {[
-        //           "ID",
-        //           "Customer",
-        //           "Subject",
-        //           "Description",
-        //           "Status",
-        //           "Priority",
-        //           "Group",
-        //           "Type",
-        //           "Assigned To",
-        //           "Watchers",
-        //           "Actions",
-        //         ].map((title) => (
-        //           <th
-        //             key={title}
-        //             className="px-6 py-3 text-left text-xs font-semibold text-gray-800 uppercase tracking-wider"
-        //           >
-        //             {title}
-        //           </th>
-        //         ))}
-        //       </tr>
-        //     </thead>
-        //     <tbody className="bg-white divide-y divide-gray-200">
-        //       {issues.map((issue) => (
-        //         <tr key={issue.name} className="hover:bg-gray-50">
-        //           <td className="px-6 py-4 text-sm font-medium truncate">
-        //             {issue.name}
-        //           </td>
-        //           <td className="px-6 py-4 text-sm truncate">
-        //             {issue.customer}
-        //           </td>
-        //           <td className="px-6 py-4 text-sm truncate">
-        //             {issue.subject}
-        //           </td>
-        //           <td
-        //             className="px-6 py-4 text-sm truncate max-w-xs"
-        //             title={issue.description}
-        //           >
-        //             {issue.description}
-        //           </td>
-        //           <td className="px-6 py-4 text-sm">
-        //             <span className={getStatusBadge(issue.status)}>
-        //               {issue.status}
-        //             </span>
-        //           </td>
-        //           <td className="px-6 py-4 text-sm">
-        //             <span className={getPriorityBadge(issue.priority)}>
-        //               {issue.priority}
-        //             </span>
-        //           </td>
-        //           <td className="px-6 py-4 text-sm">{issue.custom_group}</td>
-        //           <td className="px-6 py-4 text-sm">{issue.custom_type}</td>
-        //           <td className="px-6 py-4 text-sm">
-        //             {issue.custom_assigned_to}
-        //           </td>
-        //           <td className="px-6 py-4 text-sm">{issue.custom_watchers}</td>
-        //           <td className="px-6 py-4 text-sm">
-        //             {/* <button className="bg-[#7d4fff] text-white px-3 py-1 rounded hover:bg-blue-700">
-        //               View
-        //             </button> */}
-        //             <button
-        //               className="bg-[#7d4fff] text-white px-3 py-1 rounded hover:bg-[#6c38fa]"
-        //               onClick={() => {
-        //                 setSelectedTicket(issue);
-        //                 setViewModalOpen(true);
-        //               }}
-        //             >
-        //               View
-        //             </button>
-        //           </td>
-        //         </tr>
-        //       ))}
-        //     </tbody>
-        //   </table>
-        // </div>
 
         <div className="bg-white rounded-xl shadow-md overflow-hidden">
           <div className="overflow-x-auto">

@@ -1,15 +1,9 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useFrappeAuth } from "frappe-react-sdk";
+import type { Invoice } from "../Data/globle";
 
-interface Invoice {
-  name: string;
-  customer: string;
-  posting_date: string;
-  grand_total: number;
-  currency: string;
-  status: "Paid" | "Unpaid" | "Overdue" | string;
-}
+
 
 const Invoices = () => {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -165,42 +159,91 @@ const Invoices = () => {
       )}
 
       {viewModalOpen && selectedInvoice && (
-        <div className="fixed inset-0 z-50 bg-black/30 flex items-center justify-center px-4">
-          <div className="bg-white w-full max-w-md rounded-lg shadow-lg p-6 relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm px-4">
+          <div
+            className="relative w-full max-w-lg bg-white/90 backdrop-blur-md rounded-2xl shadow-2xl p-6
+               animate-[fadeIn_0.2s_ease-out]"
+          >
+            {/* Close Button */}
             <button
               onClick={() => setViewModalOpen(false)}
-              className="absolute top-3 right-4 text-gray-500 text-xl font-bold hover:text-gray-700"
+              className="absolute top-3 right-3 text-gray-500 hover:text-gray-800 transition"
             >
-              ×
+              ✕
             </button>
-            <h2 className="text-xl font-semibold mb-4">Invoice Details</h2>
-            <div className="space-y-2 text-sm text-gray-700">
-              <p>
-                <strong>Invoice #:</strong> {selectedInvoice.name}
-              </p>
-              <p>
-                <strong>Customer:</strong> {selectedInvoice.customer}
-              </p>
-              <p>
-                <strong>Date:</strong> {selectedInvoice.posting_date}
-              </p>
-              <p>
-                <strong>Amount:</strong> {selectedInvoice.currency}{" "}
-                {selectedInvoice.grand_total.toFixed(2)}
-              </p>
-              <p>
-                <strong>Status:</strong> {selectedInvoice.status}
-              </p>
+
+            {/* Header */}
+            <h2 className="text-2xl font-semibold text-gray-800 mb-6 border-b pb-3">
+              Invoice Details
+            </h2>
+
+            {/* Content */}
+            <div className="space-y-4 text-sm">
+              <div className="flex justify-between">
+                <span className="font-medium text-gray-600">Invoice #</span>
+                <span className="font-semibold text-gray-900">
+                  {selectedInvoice.name}
+                </span>
+              </div>
+
+              <div className="flex justify-between">
+                <span className="font-medium text-gray-600">Customer</span>
+                <span className="text-gray-900">
+                  {selectedInvoice.customer}
+                </span>
+              </div>
+
+              <div className="flex justify-between">
+                <span className="font-medium text-gray-600">Date</span>
+                <span className="text-gray-900">
+                  {selectedInvoice.posting_date}
+                </span>
+              </div>
+
+              <div className="flex justify-between">
+                <span className="font-medium text-gray-600">Amount</span>
+                <span className="text-gray-900 font-semibold">
+                  {selectedInvoice.currency}{" "}
+                  {selectedInvoice.grand_total.toFixed(2)}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center">
+                <span className="font-medium text-gray-600">Status</span>
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                    selectedInvoice.status === "Paid"
+                      ? "bg-green-100 text-green-700"
+                      : selectedInvoice.status === "Unpaid"
+                      ? "bg-red-100 text-red-700"
+                      : "bg-yellow-100 text-yellow-700"
+                  }`}
+                >
+                  {selectedInvoice.status}
+                </span>
+              </div>
             </div>
-            <div className="mt-4 text-right">
+
+            {/* Footer */}
+            <div className="mt-6 text-right">
               <button
                 onClick={() => setViewModalOpen(false)}
-                className="bg-[#7d4fff] text-white px-4 py-2 rounded hover:bg-blue-700"
+                className="bg-[#7d4fff] text-white px-5 py-2 rounded-xl shadow hover:opacity-90 transition"
               >
                 Close
               </button>
             </div>
           </div>
+
+          {/* Tailwind keyframes */}
+          <style>
+            {`
+      @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+      }
+    `}
+          </style>
         </div>
       )}
     </div>
