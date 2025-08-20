@@ -10,6 +10,7 @@ import PrivateRoute from "./component/PrivateRoute";
 import Subscription from "./pages/Subscription";
 import AdminDashboard from "./pages/admin_dashboard";
 import Success from "./pages/success";
+// import RoleRoute from "./component/RoleRoute";
 
 function App() {
   return (
@@ -21,16 +22,24 @@ function App() {
 
           {/* Protected Routes */}
           <Route element={<PrivateRoute />}>
-            <Route path="" element={<MainLayout />}>
+            <Route
+              path=""
+              element={
+                <>
+                  <MainLayout />
+                  {/* <RoleRoute /> */}
+                </>
+              }
+            >
               <Route path="/" element={<Navigate to="/dashboard" />} />
               <Route path="/dashboard" element={<Home />} />
               <Route path="/invoices" element={<Invoices />} />
               <Route path="/subscription" element={<Subscription />} />
               <Route path="/support_tickets" element={<SupportTicket />} />
-              <Route path="/admin_dashboard" element={<AdminDashboard/>}/>
-              <Route path="/success/:id" element={<Success/>}/>
+              <Route path="/success/:id" element={<Success />} />
               <Route path="*" element={<>404 Not Found</>} />
             </Route>
+            <Route path="/admin_dashboard" element={<AdminDashboard />} />
           </Route>
         </Routes>
       </FrappeProvider>

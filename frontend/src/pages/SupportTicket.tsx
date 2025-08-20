@@ -160,6 +160,26 @@ const SupportTicket = () => {
         return `${base} bg-gray-200 text-gray-700`;
     }
   };
+  useEffect(() => {
+    if (modalOpen && currentUser) {
+      const fetchCustomer = async () => {
+        try {
+          const customerRes = await axios.get(
+            "/api/method/isp_billing.api.subscription.get_customer_name_by_email",
+            { params: { email: currentUser } }
+          );
+          const customerName = customerRes.data.message;
+          if (customerName) {
+            setCustomer(customerName); // auto-fill customer field
+          }
+        } catch (err) {
+          console.error("Failed to fetch customer:", err);
+        }
+      };
+
+      fetchCustomer();
+    }
+  }, [modalOpen, currentUser]);
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -174,65 +194,74 @@ const SupportTicket = () => {
       </div>
 
       {/* Modal */}
+
       {modalOpen && (
-        <div className="fixed inset-0 bg-black/20 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold">Create New Ticket</h2>
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 backdrop-blur-sm">
+          <div className="bg-white rounded-xl shadow-xl p-6 w-full max-w-lg mx-4 max-h-[90vh] overflow-y-auto border border-gray-100">
+            {/* Header */}
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-2xl font-semibold text-gray-800">
+                Create New Ticket
+              </h2>
               <button
                 onClick={handleModalClose}
-                className="text-xl font-bold text-gray-600 cursor-pointer"
+                className="text-2xl text-gray-500 hover:text-gray-700 transition"
               >
                 ×
               </button>
             </div>
-            <form onSubmit={handleSubmit} className="space-y-4">
+
+            {/* Form */}
+            <form onSubmit={handleSubmit} className="space-y-5">
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <label className="block text-sm font-medium mb-1 text-gray-700">
                   Subject <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
-                  className="w-full border px-3 py-2 rounded"
+                  className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-[#7d4fff] focus:border-[#7d4fff] outline-none transition disabled:bg-gray-100"
                   required
                   disabled={submitting}
                 />
               </div>
+
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <label className="block text-sm font-medium mb-1 text-gray-700">
                   Description <span className="text-red-500">*</span>
                 </label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="w-full border px-3 py-2 rounded resize-vertical"
+                  className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-[#7d4fff] focus:border-[#7d4fff] outline-none transition resize-vertical disabled:bg-gray-100"
                   required
                   disabled={submitting}
                 />
               </div>
+
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <label className="block text-sm font-medium mb-1 text-gray-700">
                   Customer <span className="text-red-500">*</span>
                 </label>
                 <input
                   type="text"
                   value={customer}
                   onChange={(e) => setCustomer(e.target.value)}
-                  className="w-full border px-3 py-2 rounded"
+                  className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-[#7d4fff] focus:border-[#7d4fff] outline-none transition disabled:bg-gray-100"
                   required
-                  disabled={submitting}
+                  disabled={true}
                 />
               </div>
+
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <label className="block text-sm font-medium mb-1 text-gray-700">
                   Issue Type <span className="text-red-500">*</span>
                 </label>
                 <select
                   value={issueType}
                   onChange={(e) => setIssueType(e.target.value)}
-                  className="w-full border px-3 py-2 rounded"
+                  className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-[#7d4fff] focus:border-[#7d4fff] outline-none transition disabled:bg-gray-100"
                   required
                   disabled={submitting}
                 >
@@ -244,14 +273,15 @@ const SupportTicket = () => {
                   ))}
                 </select>
               </div>
+
               <div>
-                <label className="block text-sm font-medium mb-1">
+                <label className="block text-sm font-medium mb-1 text-gray-700">
                   Priority
                 </label>
                 <select
                   value={priority}
                   onChange={(e) => setPriority(e.target.value)}
-                  className="w-full border px-3 py-2 rounded"
+                  className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-[#7d4fff] focus:border-[#7d4fff] outline-none transition disabled:bg-gray-100"
                   disabled={submitting}
                 >
                   {priorities.length > 0
@@ -267,12 +297,15 @@ const SupportTicket = () => {
                       ))}
                 </select>
               </div>
-              <div className="mt-4">
-                <label className="block text-sm font-medium mb-1">Group</label>
+
+              <div>
+                <label className="block text-sm font-medium mb-1 text-gray-700">
+                  Group
+                </label>
                 <select
                   value={group}
                   onChange={(e) => setGroup(e.target.value)}
-                  className="w-full border px-3 py-2 rounded"
+                  className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-[#7d4fff] focus:border-[#7d4fff] outline-none transition disabled:bg-gray-100"
                   disabled={submitting}
                 >
                   {["Any", "IT", "Finance", "Sales"].map((grp) => (
@@ -282,12 +315,15 @@ const SupportTicket = () => {
                   ))}
                 </select>
               </div>
-              <div className="mt-4">
-                <label className="block text-sm font-medium mb-1">Type</label>
+
+              <div>
+                <label className="block text-sm font-medium mb-1 text-gray-700">
+                  Type
+                </label>
                 <select
                   value={selectType}
                   onChange={(e) => setSelectType(e.target.value)}
-                  className="w-full border px-3 py-2 rounded"
+                  className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-[#7d4fff] focus:border-[#7d4fff] outline-none transition disabled:bg-gray-100"
                   disabled={submitting}
                 >
                   {[
@@ -304,11 +340,13 @@ const SupportTicket = () => {
                   ))}
                 </select>
               </div>
-              <div className="flex gap-3 pt-4">
+
+              {/* Buttons */}
+              <div className="flex gap-3 pt-6">
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="flex-1 bg-[#7d4fff] text-white py-2 px-4 rounded hover:bg-[#6c38fa]"
+                  className="flex-1 bg-[#7d4fff] text-white py-2.5 px-4 rounded-lg shadow hover:bg-[#6c38fa] transition disabled:opacity-70"
                 >
                   {submitting ? "Creating..." : "Create Ticket"}
                 </button>
@@ -316,7 +354,7 @@ const SupportTicket = () => {
                   type="button"
                   onClick={handleModalClose}
                   disabled={submitting}
-                  className="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded hover:bg-gray-400"
+                  className="flex-1 bg-gray-200 text-gray-700 py-2.5 px-4 rounded-lg shadow hover:bg-gray-300 transition disabled:opacity-70"
                 >
                   Cancel
                 </button>
@@ -392,84 +430,174 @@ const SupportTicket = () => {
           </div>
         </div>
       ) : issues.length > 0 ? (
-        <div className="bg-white rounded-lg shadow overflow-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-100">
-              <tr>
-                {[
-                  "ID",
-                  "Customer",
-                  "Subject",
-                  "Description",
-                  "Status",
-                  "Priority",
-                  "Group",
-                  "Type",
-                  "Assigned To",
-                  "Watchers",
-                  "Actions",
-                ].map((title) => (
-                  <th
-                    key={title}
-                    className="px-6 py-3 text-left text-xs font-semibold text-gray-800 uppercase tracking-wider"
-                  >
-                    {title}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {issues.map((issue) => (
-                <tr key={issue.name} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm font-medium truncate">
-                    {issue.name}
-                  </td>
-                  <td className="px-6 py-4 text-sm truncate">
-                    {issue.customer}
-                  </td>
-                  <td className="px-6 py-4 text-sm truncate">
-                    {issue.subject}
-                  </td>
-                  <td
-                    className="px-6 py-4 text-sm truncate max-w-xs"
-                    title={issue.description}
-                  >
-                    {issue.description}
-                  </td>
-                  <td className="px-6 py-4 text-sm">
-                    <span className={getStatusBadge(issue.status)}>
-                      {issue.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm">
-                    <span className={getPriorityBadge(issue.priority)}>
-                      {issue.priority}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm">{issue.custom_group}</td>
-                  <td className="px-6 py-4 text-sm">{issue.custom_type}</td>
-                  <td className="px-6 py-4 text-sm">
-                    {issue.custom_assigned_to}
-                  </td>
-                  <td className="px-6 py-4 text-sm">{issue.custom_watchers}</td>
-                  <td className="px-6 py-4 text-sm">
-                    {/* <button className="bg-[#7d4fff] text-white px-3 py-1 rounded hover:bg-blue-700">
-                      View
-                    </button> */}
-                    <button
-                      className="bg-[#7d4fff] text-white px-3 py-1 rounded hover:bg-[#6c38fa]"
-                      onClick={() => {
-                        setSelectedTicket(issue);
-                        setViewModalOpen(true);
-                      }}
+        // <div className="bg-white rounded-lg shadow overflow-auto">
+        //   <table className="min-w-full divide-y divide-gray-200">
+        //     <thead className="bg-gray-100">
+        //       <tr>
+        //         {[
+        //           "ID",
+        //           "Customer",
+        //           "Subject",
+        //           "Description",
+        //           "Status",
+        //           "Priority",
+        //           "Group",
+        //           "Type",
+        //           "Assigned To",
+        //           "Watchers",
+        //           "Actions",
+        //         ].map((title) => (
+        //           <th
+        //             key={title}
+        //             className="px-6 py-3 text-left text-xs font-semibold text-gray-800 uppercase tracking-wider"
+        //           >
+        //             {title}
+        //           </th>
+        //         ))}
+        //       </tr>
+        //     </thead>
+        //     <tbody className="bg-white divide-y divide-gray-200">
+        //       {issues.map((issue) => (
+        //         <tr key={issue.name} className="hover:bg-gray-50">
+        //           <td className="px-6 py-4 text-sm font-medium truncate">
+        //             {issue.name}
+        //           </td>
+        //           <td className="px-6 py-4 text-sm truncate">
+        //             {issue.customer}
+        //           </td>
+        //           <td className="px-6 py-4 text-sm truncate">
+        //             {issue.subject}
+        //           </td>
+        //           <td
+        //             className="px-6 py-4 text-sm truncate max-w-xs"
+        //             title={issue.description}
+        //           >
+        //             {issue.description}
+        //           </td>
+        //           <td className="px-6 py-4 text-sm">
+        //             <span className={getStatusBadge(issue.status)}>
+        //               {issue.status}
+        //             </span>
+        //           </td>
+        //           <td className="px-6 py-4 text-sm">
+        //             <span className={getPriorityBadge(issue.priority)}>
+        //               {issue.priority}
+        //             </span>
+        //           </td>
+        //           <td className="px-6 py-4 text-sm">{issue.custom_group}</td>
+        //           <td className="px-6 py-4 text-sm">{issue.custom_type}</td>
+        //           <td className="px-6 py-4 text-sm">
+        //             {issue.custom_assigned_to}
+        //           </td>
+        //           <td className="px-6 py-4 text-sm">{issue.custom_watchers}</td>
+        //           <td className="px-6 py-4 text-sm">
+        //             {/* <button className="bg-[#7d4fff] text-white px-3 py-1 rounded hover:bg-blue-700">
+        //               View
+        //             </button> */}
+        //             <button
+        //               className="bg-[#7d4fff] text-white px-3 py-1 rounded hover:bg-[#6c38fa]"
+        //               onClick={() => {
+        //                 setSelectedTicket(issue);
+        //                 setViewModalOpen(true);
+        //               }}
+        //             >
+        //               View
+        //             </button>
+        //           </td>
+        //         </tr>
+        //       ))}
+        //     </tbody>
+        //   </table>
+        // </div>
+
+        <div className="bg-white rounded-xl shadow-md overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="min-w-full border-collapse">
+              <thead className="bg-gray-50 sticky top-0 z-10">
+                <tr>
+                  {[
+                    "ID",
+                    "Customer",
+                    "Subject",
+                    "Description",
+                    "Status",
+                    "Priority",
+                    "Group",
+                    "Type",
+                    "Assigned To",
+                    "Watchers",
+                    "Actions",
+                  ].map((title) => (
+                    <th
+                      key={title}
+                      className="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wide border-b"
                     >
-                      View
-                    </button>
-                  </td>
+                      {title}
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {issues.map((issue, idx) => (
+                  <tr
+                    key={issue.name}
+                    className={`${
+                      idx % 2 === 0 ? "bg-white" : "bg-gray-50"
+                    } hover:bg-gray-100 transition-colors`}
+                  >
+                    <td className="px-6 py-4 text-sm font-medium text-gray-900 truncate">
+                      {issue.name}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-700 truncate">
+                      {issue.customer}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-700 truncate">
+                      {issue.subject}
+                    </td>
+                    <td
+                      className="px-6 py-4 text-sm text-gray-600 truncate max-w-xs"
+                      title={issue.description}
+                    >
+                      {issue.description}
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      <span className={getStatusBadge(issue.status)}>
+                        {issue.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      <span className={getPriorityBadge(issue.priority)}>
+                        {issue.priority}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-700">
+                      {issue.custom_group}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-700">
+                      {issue.custom_type}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-700">
+                      {issue.custom_assigned_to}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-700">
+                      {issue.custom_watchers}
+                    </td>
+                    <td className="px-6 py-4 text-sm">
+                      <button
+                        className="bg-[#7d4fff] text-white px-4 py-1.5 rounded-lg shadow hover:bg-[#6c38fa] transition"
+                        onClick={() => {
+                          setSelectedTicket(issue);
+                          setViewModalOpen(true);
+                        }}
+                      >
+                        View
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       ) : (
         <div className="text-center text-gray-500 mt-20">

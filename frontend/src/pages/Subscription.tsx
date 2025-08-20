@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useFrappeAuth } from "frappe-react-sdk";
+import { CrossIcon } from "lucide-react";
 
 interface PlanDetail {
   plan: string;
@@ -104,7 +105,7 @@ const Subscription = () => {
       }
     );
 
-      setShowEnhancementForm(true);
+      setShowEnhancementForm(false);
       setSelectedPlans([]);
       setStartDate("");
       setEndDate("");
@@ -164,17 +165,24 @@ const Subscription = () => {
             onClick={() => setShowEnhancementForm(!showEnhancementForm)}
             className="bg-[#7d4fff] hover:bg-[#6c38fa] text-white px-4 py-2 rounded-lg shadow"
           >
-            {showEnhancementForm ? "Close Form" : "Request Enhancement"}
+            Create Enhancement Request
           </button>
         </div>
 
         {/* Enhancement Form - Toggle */}
         {showEnhancementForm && (
-          <div className="bg-white rounded-2xl shadow-lg p-6 mb-10">
+          <div className="bg-black/15 shadow-lg p-6 mb-8 fixed top-0 left-0 h-full w-full z-50">
+            <div className="bg-white rounded-2xl shadow-lg p-6 mb-10 top-1/2 left-1/2 transform translate-x-1/2 translate-y-[15%] max-w-3xl w-full">
+            <div className="flex justify-between items-center mb-4">
+
             <h2 className="text-xl font-semibold text-gray-800 mb-4">
               Create Subscription Enhancement
             </h2>
-
+            <button
+              onClick={() => setShowEnhancementForm(!showEnhancementForm)}>
+              <CrossIcon className="transform rotate-45"/>
+            </button>
+            </div>
             {/* Start & End Date */}
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
@@ -251,6 +259,7 @@ const Subscription = () => {
               {loading ? "Processing..." : "Create Enhancement Request"}
             </button>
           </div>
+            </div>
         )}
 
         {/* === Keep your existing subscriptions + available plans sections === */}

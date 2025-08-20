@@ -10,22 +10,18 @@ const Login = () => {
   const { login, isLoading, currentUser } = useFrappeAuth();
   const navigate = useNavigate();
 
-  // Define a type guard to check if currentUser has roles
-  function hasRoles(user: any): user is { roles: string[] } {
-    return user && typeof user === "object" && Array.isArray(user.roles);
-  }
-
-  // Handle redirect once user is available
   useEffect(() => {
     if (currentUser) {
       // Check if user has ANY role checked
-      const hasAnyRole =
-        hasRoles(currentUser) && currentUser.roles.length > 0;
+      const admin = "salmansaeed7272@gmail.com";
 
-      if (hasAnyRole) {
+      if (admin === currentUser) {
         navigate("/admin_dashboard");
-      } else {
+      }
+      else if (admin !== currentUser) {
         navigate("/dashboard");
+      } else {
+        navigate("/");
       }
     }
   }, [currentUser, navigate]);

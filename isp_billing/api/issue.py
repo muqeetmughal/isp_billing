@@ -132,6 +132,8 @@ def get_sales_invoice_details(invoice_number):
     if not invoice:
         frappe.throw(_("Sales Invoice not found."))
 
+    frappe.local.response.http_status_code = 200
+
     return {
         "invoice_number": invoice[0].name,
         "customer": invoice[0].customer,
@@ -145,18 +147,3 @@ def get_sales_invoice_details(invoice_number):
 
 
 
-
-
-
-import frappe
-@frappe.whitelist()
-def rename_item(old_item_code, new_item_code, merge=False):
-    
-    frappe.rename_doc(
-        doctype="Item",
-        old=old_item_code,
-        new=new_item_code,
-        merge=merge  
-    )
-    frappe.db.commit()
-    print(f"Item renamed from {old_item_code} to {new_item_code}")

@@ -306,10 +306,20 @@ def payment_success(enhancement_id):
                 created_subscriptions.append(result["subscription"])
         customer_email = frappe.db.get_value("Customer", customer, "custom_email")
         if customer_email:
+            payment_email_template = frappe.get_doc("Email Template", "Payment Success")
+            context = {
+                "customer": customer,
+                # "amount": amount,
+                "enhancement_id": enhancement_id,
+                }
+            subject = frappe.render_template(payment_email_template.subject, context)
+            message = frappe.render_template(payment_email_template.response, context)
             frappe.sendmail(
             recipients=[customer_email],
-            subject="Payment Confirmation",
-            message=f"Dear {customer},<br>Your payment for enhancement {enhancement_id} has been received successfully."
+            subject=subject,
+            message=message
+            # subject="Payment Confirmation",
+            # message=f"Dear {customer},<br>Your payment for enhancement {enhancement_id} has been received successfully."
             )
 
         frappe.local.response.http_status_code = 200

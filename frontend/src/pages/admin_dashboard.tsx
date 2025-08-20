@@ -1,7 +1,24 @@
-
-
 import { useState, useEffect } from "react";
-import { Search, Filter, ArrowLeft, Mail, Phone, MapPin, Calendar, User, Building, CreditCard, Ticket, FileText } from "lucide-react";
+import {
+  Search,
+  Filter,
+  ArrowLeft,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  User,
+  Building,
+  CreditCard,
+  Ticket,
+  FileText,
+  LogOut,
+  Loader2,
+  Bell,
+} from "lucide-react";
+import { useFrappeAuth } from "frappe-react-sdk";
+import cliSecureLogo from "../assets/clisecure logo.png";
+
 // Using fetch API instead of axios
 // Removed frappe-react-sdk dependency
 
@@ -62,7 +79,13 @@ interface Issue {
   custom_watchers?: string;
 }
 
-const CustomerDetailView = ({ customer, onBack }: { customer: Customer; onBack: () => void }) => {
+const CustomerDetailView = ({
+  customer,
+  onBack,
+}: {
+  customer: Customer;
+  onBack: () => void;
+}) => {
   const [subscriptions, setSubscriptions] = useState<Subscription[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [issues, setIssues] = useState<Issue[]>([]);
@@ -75,12 +98,18 @@ const CustomerDetailView = ({ customer, onBack }: { customer: Customer; onBack: 
 
       try {
         setLoading(true);
-        
+
         // Fetch subscriptions, invoices, and issues in parallel
         const [subscriptionsRes, invoicesRes, issuesRes] = await Promise.all([
-          fetch(`/api/method/isp_billing.api.subscription.get_subscription_details?email=${customer.custom_email}`),
-          fetch(`/api/method/isp_billing.api.sales_invoice.get_sales_invoice?email=${customer.custom_email}`),
-          fetch(`/api/method/isp_billing.api.issue.get_issues?email=${customer.custom_email}`)
+          fetch(
+            `/api/method/isp_billing.api.subscription.get_subscription_details?email=${customer.custom_email}`
+          ),
+          fetch(
+            `/api/method/isp_billing.api.sales_invoice.get_sales_invoice?email=${customer.custom_email}`
+          ),
+          fetch(
+            `/api/method/isp_billing.api.issue.get_issues?email=${customer.custom_email}`
+          ),
         ]);
 
         const subscriptionsData = await subscriptionsRes.json();
@@ -100,24 +129,31 @@ const CustomerDetailView = ({ customer, onBack }: { customer: Customer; onBack: 
     fetchCustomerDetails();
   }, [customer.custom_email]);
 
-  const getStatusBadge = (status: string, type: 'subscription' | 'invoice' | 'issue') => {
+  const getStatusBadge = (
+    status: string,
+    type: "subscription" | "invoice" | "issue"
+  ) => {
     let colorClass = "bg-gray-100 text-gray-800";
-    
-    if (type === 'subscription') {
-      if (status === 'Active') colorClass = "bg-green-100 text-green-800";
-      else if (status === 'Cancelled') colorClass = "bg-red-100 text-red-800";
-    } else if (type === 'invoice') {
-      if (status === 'Paid') colorClass = "bg-green-100 text-green-800";
-      else if (status === 'Unpaid') colorClass = "bg-red-100 text-red-800";
-      else if (status === 'Overdue') colorClass = "bg-orange-100 text-orange-800";
-    } else if (type === 'issue') {
-      if (status === 'Open') colorClass = "bg-blue-100 text-blue-800";
-      else if (status === 'Closed') colorClass = "bg-gray-100 text-gray-800";
-      else if (status === 'Resolved') colorClass = "bg-green-100 text-green-800";
+
+    if (type === "subscription") {
+      if (status === "Active") colorClass = "bg-green-100 text-green-800";
+      else if (status === "Cancelled") colorClass = "bg-red-100 text-red-800";
+    } else if (type === "invoice") {
+      if (status === "Paid") colorClass = "bg-green-100 text-green-800";
+      else if (status === "Unpaid") colorClass = "bg-red-100 text-red-800";
+      else if (status === "Overdue")
+        colorClass = "bg-orange-100 text-orange-800";
+    } else if (type === "issue") {
+      if (status === "Open") colorClass = "bg-blue-100 text-blue-800";
+      else if (status === "Closed") colorClass = "bg-gray-100 text-gray-800";
+      else if (status === "Resolved")
+        colorClass = "bg-green-100 text-green-800";
     }
 
     return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${colorClass}`}>
+      <span
+        className={`px-2 py-1 rounded-full text-xs font-medium ${colorClass}`}
+      >
         {status}
       </span>
     );
@@ -125,21 +161,82 @@ const CustomerDetailView = ({ customer, onBack }: { customer: Customer; onBack: 
 
   const getPriorityBadge = (priority: string) => {
     let colorClass = "bg-gray-100 text-gray-800";
-    
-    if (priority === 'High') colorClass = "bg-red-100 text-red-800";
-    else if (priority === 'Medium') colorClass = "bg-orange-100 text-orange-800";
-    else if (priority === 'Low') colorClass = "bg-green-100 text-green-800";
+
+    if (priority === "High") colorClass = "bg-red-100 text-red-800";
+    else if (priority === "Medium")
+      colorClass = "bg-orange-100 text-orange-800";
+    else if (priority === "Low") colorClass = "bg-green-100 text-green-800";
 
     return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${colorClass}`}>
+      <span
+        className={`px-2 py-1 rounded-full text-xs font-medium ${colorClass}`}
+      >
         {priority}
       </span>
     );
   };
+  const auth = useFrappeAuth();
+  // const activeTab = location.pathname.split("/")[1];
+
+  const [logoutLoading, setLogoutLoading] = useState(false);
+
+  const handleLogout = async () => {
+    setLogoutLoading(true);
+    try {
+      await auth.logout();
+    } finally {
+      setLogoutLoading(false);
+    }
+  };
+
 
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
+      <header className="bg-white border-b border-gray-200 sticky top-0 z-50 h-28">
+        <div className="px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-3">
+                <div className=" ">
+                  <img
+                    src={cliSecureLogo}
+                    alt="CLI Secure Logo"
+                    className="w-20 h-14 object-contain"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-4">
+              <button className="p-2 text-gray-400 hover:text-gray-600 relative">
+                <Bell className="w-5 h-5" />
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+              </button>
+
+              <div className="flex items-center space-x-2 bg-gray-50 rounded-lg px-3 py-2">
+                <div className="w-8 h-8 bg-gradient-to-br from-[#7d4fff] to-[#6c38fd] rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-medium">JS</span>
+                </div>
+                <span className="text-sm font-medium text-gray-700">
+                  {auth.currentUser}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  disabled={logoutLoading}
+                  className="text-gray-400 hover:text-gray-600 cursor-pointer disabled:opacity-50"
+                >
+                  {logoutLoading ? (
+                    <Loader2 className="w-4 h-4 animate-spin text-gray-400" />
+                  ) : (
+                    <LogOut className="w-4 h-4 text-gray-400" />
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center gap-4">
@@ -152,7 +249,9 @@ const CustomerDetailView = ({ customer, onBack }: { customer: Customer; onBack: 
             </button>
             <div className="h-6 w-px bg-gray-300" />
             <div>
-              <h1 className="text-2xl font-bold text-gray-900">{customer.customer_name}</h1>
+              <h1 className="text-2xl font-bold text-gray-900">
+                {customer.customer_name}
+              </h1>
               <p className="text-gray-600">{customer.custom_email}</p>
             </div>
           </div>
@@ -162,9 +261,13 @@ const CustomerDetailView = ({ customer, onBack }: { customer: Customer; onBack: 
             <nav className="flex space-x-8">
               {[
                 { id: "overview", label: "Overview", icon: User },
-                { id: "subscriptions", label: "Subscriptions", icon: CreditCard },
+                {
+                  id: "subscriptions",
+                  label: "Subscriptions",
+                  icon: CreditCard,
+                },
                 { id: "invoices", label: "Invoices", icon: FileText },
-                { id: "issues", label: "Support Tickets", icon: Ticket }
+                { id: "issues", label: "Support Tickets", icon: Ticket },
               ].map((tab) => (
                 <button
                   key={tab.id}
@@ -207,19 +310,27 @@ const CustomerDetailView = ({ customer, onBack }: { customer: Customer; onBack: 
                     <div className="space-y-3">
                       <div className="flex items-center gap-2">
                         <Mail className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm">{customer.custom_email || "-"}</span>
+                        <span className="text-sm">
+                          {customer.custom_email || "-"}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Phone className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm">{customer.custom_mobile_no || "-"}</span>
+                        <span className="text-sm">
+                          {customer.custom_mobile_no || "-"}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Calendar className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm">DOB: {customer.custom_date_of_birth || "-"}</span>
+                        <span className="text-sm">
+                          DOB: {customer.custom_date_of_birth || "-"}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Building className="h-4 w-4 text-gray-400" />
-                        <span className="text-sm">{customer.custom_company || "-"}</span>
+                        <span className="text-sm">
+                          {customer.custom_company || "-"}
+                        </span>
                       </div>
                     </div>
                   </div>
@@ -231,22 +342,48 @@ const CustomerDetailView = ({ customer, onBack }: { customer: Customer; onBack: 
                       Address Information
                     </h3>
                     <div className="space-y-2 text-sm">
-                      <p><strong>Street:</strong> {customer.custom_street || "-"}</p>
-                      <p><strong>City:</strong> {customer.custom_city || "-"}</p>
-                      <p><strong>ZIP Code:</strong> {customer.custom_zip_code || "-"}</p>
-                      <p><strong>Location:</strong> {customer.custom_location || "-"}</p>
+                      <p>
+                        <strong>Street:</strong> {customer.custom_street || "-"}
+                      </p>
+                      <p>
+                        <strong>City:</strong> {customer.custom_city || "-"}
+                      </p>
+                      <p>
+                        <strong>ZIP Code:</strong>{" "}
+                        {customer.custom_zip_code || "-"}
+                      </p>
+                      <p>
+                        <strong>Location:</strong>{" "}
+                        {customer.custom_location || "-"}
+                      </p>
                     </div>
                   </div>
 
                   {/* Account Details */}
                   <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Account Details</h3>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                      Account Details
+                    </h3>
                     <div className="space-y-2 text-sm">
-                      <p><strong>Billing Type:</strong> {customer.custom_billing_type || "-"}</p>
-                      <p><strong>Partner:</strong> {customer.custom_partner || "-"}</p>
-                      <p><strong>Agent:</strong> {customer.custom_agent || "-"}</p>
-                      <p><strong>Reseller:</strong> {customer.custom_reseller || "-"}</p>
-                      <p><strong>Date Added:</strong> {customer.custom_date_added || "-"}</p>
+                      <p>
+                        <strong>Billing Type:</strong>{" "}
+                        {customer.custom_billing_type || "-"}
+                      </p>
+                      <p>
+                        <strong>Partner:</strong>{" "}
+                        {customer.custom_partner || "-"}
+                      </p>
+                      <p>
+                        <strong>Agent:</strong> {customer.custom_agent || "-"}
+                      </p>
+                      <p>
+                        <strong>Reseller:</strong>{" "}
+                        {customer.custom_reseller || "-"}
+                      </p>
+                      <p>
+                        <strong>Date Added:</strong>{" "}
+                        {customer.custom_date_added || "-"}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -254,19 +391,30 @@ const CustomerDetailView = ({ customer, onBack }: { customer: Customer; onBack: 
                 {/* Quick Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-                    <p className="text-sm font-medium text-gray-600">Active Subscriptions</p>
+                    <p className="text-sm font-medium text-gray-600">
+                      Active Subscriptions
+                    </p>
                     <p className="text-2xl font-bold text-green-500">
-                      {subscriptions.filter(s => s.status === 'Active').length}
+                      {
+                        subscriptions.filter((s) => s.status === "Active")
+                          .length
+                      }
                     </p>
                   </div>
                   <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-                    <p className="text-sm font-medium text-gray-600">Total Invoices</p>
-                    <p className="text-2xl font-bold text-[#7d4fff]">{invoices.length}</p>
+                    <p className="text-sm font-medium text-gray-600">
+                      Total Invoices
+                    </p>
+                    <p className="text-2xl font-bold text-[#7d4fff]">
+                      {invoices.length}
+                    </p>
                   </div>
                   <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-                    <p className="text-sm font-medium text-gray-600">Open Issues</p>
+                    <p className="text-sm font-medium text-gray-600">
+                      Open Issues
+                    </p>
                     <p className="text-2xl font-bold text-red-500">
-                      {issues.filter(i => i.status === 'Open').length}
+                      {issues.filter((i) => i.status === "Open").length}
                     </p>
                   </div>
                 </div>
@@ -309,7 +457,10 @@ const CustomerDetailView = ({ customer, onBack }: { customer: Customer; onBack: 
                               {subscription.name}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              {getStatusBadge(subscription.status, 'subscription')}
+                              {getStatusBadge(
+                                subscription.status,
+                                "subscription"
+                              )}
                             </td>
                             <td className="px-6 py-4">
                               <div className="space-y-1">
@@ -374,10 +525,11 @@ const CustomerDetailView = ({ customer, onBack }: { customer: Customer; onBack: 
                               {invoice.posting_date}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                              {invoice.currency} {invoice.grand_total.toFixed(2)}
+                              {invoice.currency}{" "}
+                              {invoice.grand_total.toFixed(2)}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
-                              {getStatusBadge(invoice.status, 'invoice')}
+                              {getStatusBadge(invoice.status, "invoice")}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                               {invoice.company}
@@ -431,75 +583,85 @@ const CustomerDetailView = ({ customer, onBack }: { customer: Customer; onBack: 
               </div>
             )} */}
 
-              {activeTab === "issues" && (
-  <div className="bg-white rounded-lg shadow-md border border-gray-200">
-    <div className="px-6 py-4 border-b border-gray-200">
-      <h2 className="text-lg font-semibold text-gray-900">
-        Support Tickets ({issues.length})
-      </h2>
-    </div>
+            {activeTab === "issues" && (
+              <div className="bg-white rounded-lg shadow-md border border-gray-200">
+                <div className="px-6 py-4 border-b border-gray-200">
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    Support Tickets ({issues.length})
+                  </h2>
+                </div>
 
-    {issues.length === 0 ? (
-      <div className="text-center py-12">
-        <Ticket className="h-12 w-12 mx-auto text-gray-400" />
-        <p className="text-gray-500">No support tickets found</p>
-      </div>
-    ) : (
-      <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                ID
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Subject
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Status
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Priority
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Type
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Group
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Assigned To
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                Description
-              </th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {issues.map((issue) => (
-              <tr key={issue.name} className="hover:bg-gray-50">
-                <td className="px-6 py-4 text-sm text-gray-700">{issue.name}</td>
-                <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                  {issue.subject}
-                </td>
-                <td className="px-6 py-4 text-sm">{getStatusBadge(issue.status, "issue")}</td>
-                <td className="px-6 py-4 text-sm">{getPriorityBadge(issue.priority)}</td>
-                <td className="px-6 py-4 text-sm text-gray-700">{issue.custom_type || "-"}</td>
-                <td className="px-6 py-4 text-sm text-gray-700">{issue.custom_group || "-"}</td>
-                <td className="px-6 py-4 text-sm text-gray-700">{issue.custom_assigned_to || "-"}</td>
-                <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">
-                  {issue.description}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    )}
-  </div>
-)}
-
-
+                {issues.length === 0 ? (
+                  <div className="text-center py-12">
+                    <Ticket className="h-12 w-12 mx-auto text-gray-400" />
+                    <p className="text-gray-500">No support tickets found</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            ID
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            Subject
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            Status
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            Priority
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            Type
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            Group
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            Assigned To
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                            Description
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="bg-white divide-y divide-gray-200">
+                        {issues.map((issue) => (
+                          <tr key={issue.name} className="hover:bg-gray-50">
+                            <td className="px-6 py-4 text-sm text-gray-700">
+                              {issue.name}
+                            </td>
+                            <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                              {issue.subject}
+                            </td>
+                            <td className="px-6 py-4 text-sm">
+                              {getStatusBadge(issue.status, "issue")}
+                            </td>
+                            <td className="px-6 py-4 text-sm">
+                              {getPriorityBadge(issue.priority)}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-700">
+                              {issue.custom_type || "-"}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-700">
+                              {issue.custom_group || "-"}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-700">
+                              {issue.custom_assigned_to || "-"}
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-600 max-w-xs truncate">
+                              {issue.description}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
           </>
         )}
       </div>
@@ -512,13 +674,17 @@ const AdminDashboard = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [loading, setLoading] = useState(true);
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
+    null
+  );
 
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
         setLoading(true);
-        const response = await fetch("/api/method/isp_billing.api.subscription.get_customer");
+        const response = await fetch(
+          "/api/method/isp_billing.api.subscription.get_customer"
+        );
         const data = await response.json();
         setCustomers(data.message || []);
       } catch (error) {
@@ -533,7 +699,9 @@ const AdminDashboard = () => {
 
   const filteredCustomers = customers.filter((customer) => {
     const matchesSearch =
-      customer.customer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      customer.customer_name
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
       customer.custom_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       customer.custom_partner?.toLowerCase().includes(searchTerm.toLowerCase());
 
@@ -544,14 +712,18 @@ const AdminDashboard = () => {
   });
 
   const totalCustomers = customers.length;
-  const activeCustomers = customers.filter((c) => c.custom_billing_type === "Recurring").length;
-  const inactiveCustomers = customers.filter((c) => c.custom_billing_type === "Prepaid (Custom)").length;
+  const activeCustomers = customers.filter(
+    (c) => c.custom_billing_type === "Recurring"
+  ).length;
+  const inactiveCustomers = customers.filter(
+    (c) => c.custom_billing_type === "Prepaid (Custom)"
+  ).length;
 
   if (selectedCustomer) {
     return (
-      <CustomerDetailView 
-        customer={selectedCustomer} 
-        onBack={() => setSelectedCustomer(null)} 
+      <CustomerDetailView
+        customer={selectedCustomer}
+        onBack={() => setSelectedCustomer(null)}
       />
     );
   }
@@ -561,7 +733,9 @@ const AdminDashboard = () => {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Admin Dashboard</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Admin Dashboard
+          </h1>
           <p className="text-gray-600">Manage and view all your customers</p>
         </div>
 
@@ -572,12 +746,20 @@ const AdminDashboard = () => {
             <p className="text-2xl font-bold text-gray-900">{totalCustomers}</p>
           </div>
           <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-            <p className="text-sm font-medium text-gray-600">Active Customers</p>
-            <p className="text-2xl font-bold text-green-500">{activeCustomers}</p>
+            <p className="text-sm font-medium text-gray-600">
+              Active Customers
+            </p>
+            <p className="text-2xl font-bold text-green-500">
+              {activeCustomers}
+            </p>
           </div>
           <div className="bg-white rounded-lg shadow-md p-6 border border-gray-200">
-            <p className="text-sm font-medium text-gray-600">Inactive Customers</p>
-            <p className="text-2xl font-bold text-red-500">{inactiveCustomers}</p>
+            <p className="text-sm font-medium text-gray-600">
+              Inactive Customers
+            </p>
+            <p className="text-2xl font-bold text-red-500">
+              {inactiveCustomers}
+            </p>
           </div>
         </div>
 
@@ -635,41 +817,67 @@ const AdminDashboard = () => {
               <table className="w-full">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer Name</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Mobile</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Partner</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Billing Type</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">City</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Customer Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Email
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Mobile
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Partner
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Billing Type
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      City
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {filteredCustomers.map((customer) => (
                     <tr key={customer.name} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">{customer.customer_name}</div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {customer.customer_name}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{customer.custom_email || "-"}</div>
+                        <div className="text-sm text-gray-900">
+                          {customer.custom_email || "-"}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{customer.custom_mobile_no || "-"}</div>
+                        <div className="text-sm text-gray-900">
+                          {customer.custom_mobile_no || "-"}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{customer.custom_partner || "-"}</div>
+                        <div className="text-sm text-gray-900">
+                          {customer.custom_partner || "-"}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          customer.custom_billing_type === 'Recurring' 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-blue-100 text-blue-800'
-                        }`}>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium ${
+                            customer.custom_billing_type === "Recurring"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-blue-100 text-blue-800"
+                          }`}
+                        >
                           {customer.custom_billing_type || "-"}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900">{customer.custom_city || "-"}</div>
+                        <div className="text-sm text-gray-900">
+                          {customer.custom_city || "-"}
+                        </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <button
