@@ -2,7 +2,11 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { useFrappeAuth } from "frappe-react-sdk";
 import { CrossIcon } from "lucide-react";
-import type { PlanDetail, SubscriptionPlan, SubscriptionType } from "../Data/globle";
+import type {
+  PlanDetail,
+  SubscriptionPlan,
+  SubscriptionType,
+} from "../Data/globle";
 
 const Subscription = () => {
   const { currentUser } = useFrappeAuth();
@@ -53,35 +57,35 @@ const Subscription = () => {
 
   // Create enhancement request
   const handleEnhancementRequest = async () => {
-  if (!currentUser) {
-    alert("No logged in user.");
-    return;
-  }
-  if (!startDate || !endDate || !amount || selectedPlans.length === 0) {
-    alert("Please fill all fields and select at least one plan.");
-    return;
-  }
+    if (!currentUser) {
+      alert("No logged in user.");
+      return;
+    }
+    if (!startDate || !endDate || !amount || selectedPlans.length === 0) {
+      alert("Please fill all fields and select at least one plan.");
+      return;
+    }
 
-  setLoading(true);
-  try {
-    // fetch customer name by email
-    const customerRes = await axios.get(
-      "/api/method/isp_billing.api.subscription.get_customer_name_by_email",
-      { params: { email: currentUser } }
-    );
-    const customerName = customerRes.data.message;
+    setLoading(true);
+    try {
+      // fetch customer name by email
+      const customerRes = await axios.get(
+        "/api/method/isp_billing.api.subscription.get_customer_name_by_email",
+        { params: { email: currentUser } }
+      );
+      const customerName = customerRes.data.message;
 
-    // now use that customer name
-    await axios.post(
-      "/api/method/isp_billing.api.payment_setup.create_subscription_with_payment",
-      {
-        customer: customerName,
-        plan: selectedPlans,
-        start_date: startDate,
-        end_date: endDate,
-        amount: amount,
-      }
-    );
+      // now use that customer name
+      await axios.post(
+        "/api/method/isp_billing.api.payment_setup.create_subscription_with_payment",
+        {
+          customer: customerName,
+          plan: selectedPlans,
+          start_date: startDate,
+          end_date: endDate,
+          amount: amount,
+        }
+      );
 
       setShowEnhancementForm(false);
       setSelectedPlans([]);
@@ -89,18 +93,46 @@ const Subscription = () => {
       setEndDate("");
       setAmount("");
 
-    alert("Subscription enhancement request created successfully!");
-  } catch (error) {
-    console.error("Enhancement creation error:", error);
-    alert("Failed to create subscription enhancement");
-  } finally {
-    setLoading(false);
-  }
-};
+      alert("Subscription enhancement request created successfully!");
+    } catch (error) {
+      console.error("Enhancement creation error:", error);
+      alert("Failed to create subscription enhancement");
+    } finally {
+      setLoading(false);
+    }
+  };
 
+  const handleSubscribe = async (planName: string) => {
+    if (!currentUser) {
+      alert("No logged in user.");
+      return;
+    }
+    setLoading(true);
+    try {
+      // fetch customer name from backend by email
+      const customerRes = await axios.get(
+        "/api/method/isp_billing.api.subscription.get_customer_name_by_email",
+        { params: { email: currentUser } }
+      );
+      const customerName = customerRes.data.message;
 
+      // call your quotation creation API
+      const res = await axios.post(
+        "/api/method/isp_billing.api.subscription.create_quotation_from_subscription_plan",
+        {
+          subscription_plan_name: planName,
+          customer: customerName,
+        }
+      );
 
-
+      alert(`Quotation Created Successfully: ${res.data.message}`);
+    } catch (err) {
+      console.error("Quotation creation error:", err);
+      alert("Failed to create quotation");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const isCurrentPlan = (planName: string) => {
     return subscriptions.some((sub) =>
@@ -151,93 +183,95 @@ const Subscription = () => {
         {showEnhancementForm && (
           <div className="bg-black/15 shadow-lg p-6 mb-8 fixed top-0 left-0 h-full w-full z-50">
             <div className="bg-white rounded-2xl shadow-lg p-6 mb-10 top-1/2 left-1/2 transform translate-x-1/2 translate-y-[15%] max-w-3xl w-full">
-            <div className="flex justify-between items-center mb-4">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                  Create Subscription Enhancement
+                </h2>
+                <button
+                  onClick={() => setShowEnhancementForm(!showEnhancementForm)}
+                >
+                  <CrossIcon className="transform rotate-45" />
+                </button>
+              </div>
+              {/* Start & End Date */}
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    Start Date
+                  </label>
+                  <input
+                    type="date"
+                    className="w-full border rounded-lg p-2 mt-1"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-700">
+                    End Date
+                  </label>
+                  <input
+                    type="date"
+                    className="w-full border rounded-lg p-2 mt-1"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                  />
+                </div>
+              </div>
 
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">
-              Create Subscription Enhancement
-            </h2>
-            <button
-              onClick={() => setShowEnhancementForm(!showEnhancementForm)}>
-              <CrossIcon className="transform rotate-45"/>
-            </button>
-            </div>
-            {/* Start & End Date */}
-            <div className="grid grid-cols-2 gap-4 mb-4">
-              <div>
+              {/* Auto Calculated Amount */}
+              <div className="mb-4">
                 <label className="text-sm font-medium text-gray-700">
-                  Start Date
+                  Amount
                 </label>
                 <input
-                  type="date"
-                  className="w-full border rounded-lg p-2 mt-1"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
+                  type="number"
+                  className="w-full border rounded-lg p-2 mt-1 bg-gray-100"
+                  value={amount}
+                  readOnly
                 />
               </div>
-              <div>
+
+              {/* Plan Selection */}
+              <div className="mb-4">
                 <label className="text-sm font-medium text-gray-700">
-                  End Date
+                  Select Plans
                 </label>
-                <input
-                  type="date"
-                  className="w-full border rounded-lg p-2 mt-1"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                />
+                <div className="grid grid-cols-2 gap-4 mt-2">
+                  {plans.map((plan) => {
+                    const selected = selectedPlans.find(
+                      (p) => p.plan === plan.name
+                    );
+                    return (
+                      <div
+                        key={plan.name}
+                        className={`p-4 border rounded-lg cursor-pointer ${
+                          selected
+                            ? "border-[#7d4fff] bg-blue-50"
+                            : "border-gray-200"
+                        }`}
+                        onClick={() =>
+                          togglePlanSelection(plan.name, plan.cost)
+                        }
+                      >
+                        <p className="text-gray-500 text-sm">
+                          {plan.currency} {plan.cost} / {plan.item}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
 
-            {/* Auto Calculated Amount */}
-            <div className="mb-4">
-              <label className="text-sm font-medium text-gray-700">
-                Amount
-              </label>
-              <input
-                type="number"
-                className="w-full border rounded-lg p-2 mt-1 bg-gray-100"
-                value={amount}
-                readOnly
-              />
+              <button
+                onClick={handleEnhancementRequest}
+                disabled={loading}
+                className="w-full bg-[#7d4fff] hover:bg-[#6c38fa] disabled:bg-[#9e7aff] text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200"
+              >
+                {loading ? "Processing..." : "Create Enhancement Request"}
+              </button>
             </div>
-
-            {/* Plan Selection */}
-            <div className="mb-4">
-              <label className="text-sm font-medium text-gray-700">
-                Select Plans
-              </label>
-              <div className="grid grid-cols-2 gap-4 mt-2">
-                {plans.map((plan) => {
-                  const selected = selectedPlans.find(
-                    (p) => p.plan === plan.name
-                  );
-                  return (
-                    <div
-                      key={plan.name}
-                      className={`p-4 border rounded-lg cursor-pointer ${
-                        selected
-                          ? "border-[#7d4fff] bg-blue-50"
-                          : "border-gray-200"
-                      }`}
-                      onClick={() => togglePlanSelection(plan.name, plan.cost)}
-                    >
-                      <p className="text-gray-500 text-sm">
-                        {plan.currency} {plan.cost} / {plan.item}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <button
-              onClick={handleEnhancementRequest}
-              disabled={loading}
-              className="w-full bg-[#7d4fff] hover:bg-[#6c38fa] disabled:bg-[#9e7aff] text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200"
-            >
-              {loading ? "Processing..." : "Create Enhancement Request"}
-            </button>
           </div>
-            </div>
         )}
 
         {/* === Keep your existing subscriptions + available plans sections === */}
@@ -389,8 +423,9 @@ const Subscription = () => {
             </div>
 
             {/* Available Plans Section */}
-            <div>
-              <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+            {/* Available Plans Section */}
+            <div className="mb-10">
+              <h2 className="text-2xl font-semibold text-gray-800 mb-4">
                 {subscriptions.length > 0
                   ? "Other Available Plans"
                   : "Choose Your Plan"}
@@ -431,7 +466,7 @@ const Subscription = () => {
                       </span>
                     </div>
 
-                    {plan.features && plan.features.length > 0 && (
+                    {plan.features?.length > 0 && (
                       <ul className="mb-6 text-sm text-gray-600 space-y-2">
                         {plan.features.map((feature, index) => (
                           <li key={index} className="flex items-center">
@@ -452,15 +487,15 @@ const Subscription = () => {
                       </ul>
                     )}
 
-                    {/* {!isCurrentPlan(plan.name) && (
+                    {!isCurrentPlan(plan.name) && (
                       <button
                         onClick={() => handleSubscribe(plan.name)}
                         disabled={loading}
-                        className="w-full bg-[#7d4fff] hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 disabled:cursor-not-allowed"
+                        className="w-full bg-[#7d4fff] hover:bg-[#6c38fa] disabled:bg-blue-400 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 disabled:cursor-not-allowed"
                       >
                         {loading ? "Processing..." : "Subscribe Now"}
                       </button>
-                    )} */}
+                    )}
                   </div>
                 ))}
               </div>

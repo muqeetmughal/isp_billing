@@ -5,7 +5,10 @@
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "admin_email_section",
   "admin_email",
+  "section_break_vdjx",
+  "sla_document",
   "section_break_jlsl",
   "stripe_secret_key",
   "column_break_vbpg",
@@ -36,13 +39,28 @@
    "fieldname": "stripe_publish_key",
    "fieldtype": "Data",
    "label": "Stripe Publish Key"
+  },
+  {
+   "fieldname": "section_break_vdjx",
+   "fieldtype": "Section Break",
+   "label": "Service Level Agreement"
+  },
+  {
+   "fieldname": "sla_document",
+   "fieldtype": "Attach",
+   "label": "SLA Document"
+  },
+  {
+   "fieldname": "admin_email_section",
+   "fieldtype": "Section Break",
+   "label": "Admin Email"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-08-12 21:16:42.448794",
+ "modified": "2025-08-22 12:23:25.603901",
  "modified_by": "Administrator",
  "module": "Isp Billing",
  "name": "Isp Billing Setting",

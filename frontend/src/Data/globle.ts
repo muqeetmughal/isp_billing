@@ -42,3 +42,28 @@ export interface Invoice {
   currency: string;
   status: "Paid" | "Unpaid" | "Overdue" | string;
 }
+
+
+
+export interface Customer {
+  name: string;
+  customer_name: string;
+  custom_email: string;
+  custom_mobile_no: string;
+  custom_billing_email: string;
+  custom_partner: string;
+  custom_billing_type: string;
+  custom_city: string;
+  custom_portal_login: string;
+  custom_portal_password: string;
+  custom_location: string;
+  custom_date_added: string;
+  custom_street: string;
+  custom_zip_code: string;
+  custom_reseller: string;
+  custom_company: string;
+  custom_agent: string;
+  custom_identification: string;
+  custom_date_of_birth: string;
+  custom_hotspot_mac: string;
+}

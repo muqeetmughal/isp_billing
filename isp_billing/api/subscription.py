@@ -6,7 +6,7 @@ from frappe.query_builder import DocType
 
 
 @frappe.whitelist(allow_guest=True)
-def get_customer():
+def get_customer(email):
     Customer = DocType("Customer")
     
     customers = (
@@ -33,10 +33,45 @@ def get_customer():
                 Customer.custom_date_of_birth,
                 Customer.custom_hotspot_mac
                 )
+                .where(Customer.custom_email == email)
             .run(as_dict=True)
     )
     return customers
 
+
+@frappe.whitelist(allow_guest=True)
+def set_user_password(email, password):
+    """Set user password for GoCardless"""
+    try:
+        user = frappe.get_doc("User", email)
+        user.db_set("new_password", password)
+        user.save()
+        frappe.db.commit()
+        reset_password = frappe.get_doc("Email Template", "Reset User Password")
+        context = {
+            "user": user.first_name,
+            "email": email,
+            "password": password
+        }
+        subject = frappe.render_template(reset_password.subject, context)
+        message = frappe.render_template(reset_password.response, context)
+        frappe.sendmail(
+            recipients=[email],
+            subject=subject,
+            message=message
+        )
+        frappe.local.response.http_status_code = 200
+        return {
+            "msg": "Password set successfully",
+            "success": True
+        }
+    except Exception as e:
+        frappe.log_error(f"Set User Password Error: {e}")
+        frappe.local.response.http_status_code = 400
+        return {
+            "msg": "Failed to set password. Please try again.",
+            "success": False
+        }
 
 
 
@@ -67,6 +102,8 @@ def get_customer_name_by_email(email):
 
 
 
+
+    
 
 
 
@@ -135,14 +172,106 @@ def get_subscription_plans():
     ).run(as_dict=True)
     
     if not subscription_plans:
-        frappe.throw("No subscription plans found.")
+        return("No subscription plans found.")
     
     return subscription_plans
 
 
 
+
+
+
+
+
+
+
+
 @frappe.whitelist(allow_guest=True)
-def sub_status():
+def create_quotation_from_subscription_plan(subscription_plan_name, customer):
+    # Fetch subscription plan details
+    subscription_plan = frappe.get_doc("Subscription Plan", subscription_plan_name)
+
+    if not subscription_plan:
+        frappe.throw(f"Subscription Plan {subscription_plan_name} not found")
+
+    # Create quotation document
+    quotation = frappe.new_doc("Quotation")
+    quotation.party_type = "Customer"
+    quotation.party_name = customer
+    quotation.quotation_to = "Customer"
+
+    # Set custom_subscription_plan field
+    quotation.custom_subscription_plan = subscription_plan.name
+
+    # Add quotation item
+    quotation.append("items", {
+        "item_code": subscription_plan.item,
+        "qty": 1,
+        "rate": subscription_plan.cost
+    })
+
+    quotation.insert(ignore_permissions=True)
+    quotation.submit()  
+
+    return quotation.name
+
+
+
+
+@frappe.whitelist(allow_guest=True)
+def quotation_to_subscription(customer, plan, quotation, qty=1):
+
+    doc = frappe.get_doc({
+        "doctype": "Subscription",
+        "party_type": "Customer",
+        "party": customer,
+        # "start_date": start_date,
+        # "end_date": end_date,
+        "start_date": "2025-08-21",
+        "end_date": "2025-10-21",
+        "custom_quotation": quotation
+    })
+    
+    doc.append("plans", {
+        "plan": plan,
+        "qty": qty
+    })
+    doc.save(ignore_permissions=True)
+    frappe.db.commit()
+    frappe.local.response.http_status_code = 201
+    return {
+        "msg": "Plan added successfully",
+        "subscription": doc.name,
+        "success": True
+    }
+
+
+
+
+
+
+def add_customer_bank_detail(bank_name, account_name):
+    
+    doc = frappe.get_doc("Customer", "Suleman Saeed")
+
+    doc.custom_bank_name = bank_name
+    doc.custom_account_name = account_name
+    doc.save(ignore_permissions=True)
+    frappe.db.commit()
+    frappe.local.response.http_status_code = 200
+    return {
+        "msg": "Bank details added successfully",
+        "customer": doc.name,
+        "success": True
+    }
+
+
+
+
+
+
+@frappe.whitelist(allow_guest=True)
+def subscription_status():
 
     doc = frappe.get_doc("Subscription", "ACC-SUB-2025-00008")
 
@@ -156,8 +285,6 @@ def sub_status():
         "subscription": doc.name,
         "success": True
     }
-
-
 
 
 def create_subscription(customer, start_date, end_date, plan_details):
@@ -184,60 +311,6 @@ def create_subscription_from_plan_api(customer, start_date, end_date, plan_detai
     if isinstance(plan_details, str):
         plan_details = json.loads(plan_details)
     return create_subscription(customer, start_date, end_date, plan_details)
-
-
-
-
-
-
-
-
-
-
-
-
-@frappe.whitelist(allow_guest=True)
-def send_payment_link_email(enhancement_id):
-
-    # get Subscription Enhancement doc
-    doc = frappe.get_doc("Subscription Enhancement", enhancement_id)
-
-    # get customer email
-    customer_email = frappe.db.get_value("Customer", doc.customer, "custom_email")
-
-    if not customer_email:
-        return(f"No custom_email found for Customer {doc.customer}")
-
-    if not doc.payment_link:
-        return(f"No payment_link found in Subscription Enhancement {enhancement_id}")
-
-    # prepare the message
-    subject = "Your Subscription Payment Link"
-    message = f"""
-    Hello,<br><br>
-    Please complete your payment using the link below:<br>
-    <a href="{doc.payment_link}">{doc.payment_link}</a><br><br>
-    Thank you!
-    """
-
-    # send email
-    frappe.sendmail(
-        recipients=[customer_email],
-        subject=subject,
-        message=message
-    )
-    frappe.local.response.http_status_code = 200
-    return {
-        "msg": "Email sent successfully",
-        "success": True
-    }
-
-
-
-
-
-
-
 
 
 
@@ -408,69 +481,6 @@ def add_plan_in_subscription(party, plan, start_date, end_date, qty):
 
 
 
-
-
-
-
-#create sales_invoice and payment entry when subscription is added
-def create_sales_invoice_from_subscription(doc, method):
-    """Create Sales Invoice when a new Subscription is created"""
-
-    if not doc.plans:
-        frappe.throw("No Subscription Plans linked with this Subscription")
-
-    invoice = frappe.new_doc("Sales Invoice")
-    invoice.customer = doc.party  # customer comes from subscription.party
-    invoice.due_date = frappe.utils.nowdate()
-    invoice.company = doc.company
-
-    # Loop over subscription's plans
-    for plan_row in doc.plans:
-        plan = frappe.get_doc("Subscription Plan", plan_row.plan)
-
-        if not plan.item:
-            frappe.throw(f"Subscription Plan {plan.name} has no Item linked")
-
-        # Add item from subscription plan
-        invoice.append("items", {
-            "item_code": plan.item,
-            "qty": plan_row.qty or 1,
-            "rate": plan.cost or 0
-        })
-
-    invoice.insert(ignore_permissions=True)
-
-    # Submit automatically if required
-    if doc.submit_invoice:
-        invoice.submit()
-
-        # 🔹 Create Payment Entry against this invoice
-        payment_entry = frappe.get_doc({
-            "doctype": "Payment Entry",
-            "payment_type": "Receive",
-            "company": invoice.company,
-            "posting_date": frappe.utils.nowdate(),
-            "party_type": "Customer",
-            "party": invoice.customer,
-            "paid_amount": invoice.rounded_total or invoice.grand_total,
-            "received_amount": invoice.rounded_total or invoice.grand_total,
-            "paid_to": frappe.get_cached_value("Company", invoice.company, "default_receivable_account"),
-            "references": [
-                {
-                    "reference_doctype": "Sales Invoice",
-                    "reference_name": invoice.name,
-                    "total_amount": invoice.rounded_total or invoice.grand_total,
-                    "outstanding_amount": invoice.rounded_total or invoice.grand_total,
-                    "allocated_amount": invoice.rounded_total or invoice.grand_total,
-                }
-            ]
-        })
-        payment_entry.insert(ignore_permissions=True)
-        payment_entry.submit()
-
-        frappe.msgprint(f"Payment Entry {payment_entry.name} created for Sales Invoice {invoice.name}")
-
-    frappe.msgprint(f"Sales Invoice {invoice.name} created for Subscription {doc.name}")
 
 
 

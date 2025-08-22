@@ -58,66 +58,168 @@ def create_lead(name, pipline_status, partner, location, city, email, billing_em
 
 
 
-
-
-
-
-@frappe.whitelist(allow_guest=True)
-def get_subscription_enhancement(enhancement_id):
-    SubscriptionEnhancement = DocType("Subscription Enhancement")
-    SubscriptionPlanDetail = DocType("Subscription Plan Detail")
+def get_customer():
+    Customer = DocType("Customer")
     
-    enhancements = (
-        frappe.qb.from_(SubscriptionEnhancement)
-            .join(SubscriptionPlanDetail).on(SubscriptionEnhancement.name == SubscriptionPlanDetail.parent)
-
+    customers = (
+        frappe.qb.from_(Customer)
             .select(
-                SubscriptionEnhancement.name,
-                SubscriptionEnhancement.customer,
-                SubscriptionEnhancement.start_date,
-                SubscriptionEnhancement.end_date,
-                SubscriptionEnhancement.status,
-                SubscriptionEnhancement.amount,
-                SubscriptionEnhancement.payment_link,
-                SubscriptionPlanDetail.plan,
-                SubscriptionPlanDetail.qty
-            )
-            .where(SubscriptionEnhancement.name == enhancement_id)
+                Customer.name,
+                Customer.customer_name, 
+                Customer.custom_email,
+                Customer.custom_mobile_no,
+                Customer.custom_billing_email,
+                Customer.custom_partner,
+                Customer.custom_billing_type,
+                Customer.custom_city,
+                Customer.custom_portal_login,
+                Customer.custom_portal_password,
+                Customer.custom_location,
+                Customer.custom_date_added,
+                Customer.custom_street,
+                Customer.custom_zip_code,
+                Customer.custom_reseller,
+                Customer.custom_company,
+                Customer.custom_agent,
+                Customer.custom_identification,
+                Customer.custom_date_of_birth,
+                Customer.custom_hotspot_mac
+                )
             .run(as_dict=True)
     )
-    
-    # return enhancements
-    subscription_enhancement = {}
-    for row in enhancements:
-        enhancement_name = row["name"]
-        if enhancement_name not in subscription_enhancement:
-            subscription_enhancement[enhancement_name] = {
-                "name": enhancement_name,
-                "customer": row["customer"],
-                "status": row["status"],
-                "start_date": row["start_date"],
-                "end_date": row["end_date"],
-                "amount": row["amount"],
-                "payment_link": row["payment_link"],
-                "plans": []
-            }
-
-        subscription_enhancement[enhancement_name]["plans"].append({
-            "plan": row["plan"],
-            "qty": row["qty"]
-        })
-
-    return list(subscription_enhancement.values())
+    return customers
 
 
 
 
 
+# Create Payment Request for a Sales Invoice
+def create_payment_request():
+    pr = frappe.get_doc({
+        "doctype": "Payment Request",
+        "payment_gateway": "GoCardless-YourGatewayName",
+        "reference_doctype": "Sales Invoice",
+        "reference_name": "ACC-SINV-2025-00020",
+        "party_type": "Customer",
+        "party": "Suleman Saeed",
+        "currency": "USD",
+        "grand_total": 100,
+        "email_to": "salmansaeed7272@gmail.com"
+    })
+    pr.insert()
+    pr.submit()
+    return {
+        "msg": "Payment Request created successfully",
+        "payment_request": pr.name,
+        "success": True
+    }
+
+
+def create_gocardless_mandate():
+       
+    doc = frappe.get_doc({
+        "doctype": "GoCardless Mandate",
+        "customer": "Suleman Saeed",
+        "mandate": "Suleman Saeed",
+        "gocardless_customer": "Suleman Saeed",
+    })
+    doc.insert(ignore_permissions=True)
+    frappe.db.commit()
+    frappe.local.response.http_status_code = 201
+    return {
+        "msg": "GoCardless Mandate Created Successfully",
+        "mandate": doc.name,
+        "success": True
+    }
 
 
 
 
 
+
+
+
+
+
+
+
+# when issue create then it will send sla document to customer 
+def get_isp_billing_settings():
+    sla = frappe.get_single("Isp Billing Setting")
+    return sla.sla_document
+
+def send_sla_on_issue_create(doc, method):
+    """Send SLA email with document when Issue is created"""
+    if not doc.raised_by:
+        return
+
+    # Get SLA document
+    sla_document = get_isp_billing_settings()
+
+    # Get Email Template
+    email_template = frappe.get_doc("Email Template", "Send SLA when Issue create")
+    subject = frappe.render_template(email_template.subject, {"doc": doc})
+    message = frappe.render_template(email_template.response, {"doc": doc})
+
+    # Send mail with attachment
+    attachments = []
+    if sla_document:
+        file_doc = frappe.get_doc("File", {"file_url": sla_document})
+        attachments.append({"fname": file_doc.file_name, "fcontent": file_doc.get_content()})
+
+    frappe.sendmail(
+        recipients=[doc.raised_by],
+        subject=subject,
+        message=message,
+        attachments=attachments,
+        reference_doctype=doc.doctype,
+        reference_name=doc.name
+    )
+
+
+
+
+
+
+
+
+
+
+
+
+# import frappe
+# from frappe.utils.password import update_password
+# from frappe.utils import random_string
+
+# def send_password_reset_email(user_email):
+#     """Send reset password link using Email Template"""
+
+#     # Generate reset link
+#     user = frappe.get_doc("User", user_email)
+#     key = random_string(32)
+#     user.reset_password_key = key
+#     user.db_update()
+
+#     reset_link = f"{frappe.utils.get_url()}/update-password?key={key}"
+
+#     # Fetch Email Template
+#     email_template = frappe.get_doc("Email Template", "Reset User Password")
+#     subject = frappe.render_template(email_template.subject, {"user": user, "reset_link": reset_link})
+#     message = frappe.render_template(email_template.response, {"user": user, "reset_link": reset_link})
+
+#     # Send Email
+#     frappe.sendmail(
+#         recipients=[user_email],
+#         subject=subject,
+#         message=message,
+#         reference_doctype="User",
+#         reference_name=user.name
+#     )
+
+# def send_password_setup_mail(doc, method):
+#     """Auto-send password setup email when new User created"""
+#     if doc.email:
+#         send_password_reset_email(doc.email)
 
 
 
