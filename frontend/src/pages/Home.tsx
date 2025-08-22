@@ -217,6 +217,30 @@ const Home = () => {
                   <span className="font-semibold w-40">Date Added:</span>
                   <span>{customerDetails.custom_date_added}</span>
                 </div>
+                <div className="flex">
+                  <span className="font-semibold w-40">Portaone Customers IDs:</span>
+                  <span>{customerDetails.custom_portaone_customers_ids}</span>
+                </div>
+                <div className="flex">
+                  <span className="font-semibold w-40">Pax8 Company ID:</span>
+                  <span>{customerDetails.custom_pax8_company_id}</span>
+                </div>
+                <div className="flex">
+                  <span className="font-semibold w-40">Company ID:</span>
+                  <span>{customerDetails.custom_company_id}</span>
+                </div>
+                <div className="flex">
+                  <span className="font-semibold w-40">GDPR Agreement:</span>
+                  <span>{customerDetails.custom_gdpr_agreement}</span>
+                </div>
+                <div className="flex">
+                  <span className="font-semibold w-40">Pax8 Csv Company ID:</span>
+                  <span>{customerDetails.custom_pax8_csv_company_id}</span>
+                </div>
+                <div className="flex">
+                  <span className="font-semibold w-40">VAT ID:</span>
+                  <span>{customerDetails.custom_vat_id}</span>
+                </div>
               </div>
             </div>
           )}

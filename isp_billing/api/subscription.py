@@ -31,7 +31,13 @@ def get_customer(email):
                 Customer.custom_agent,
                 Customer.custom_identification,
                 Customer.custom_date_of_birth,
-                Customer.custom_hotspot_mac
+                Customer.custom_hotspot_mac,
+                Customer.custom_portaone_customers_ids,
+                Customer.custom_pax8_company_id,
+                Customer.custom_company_id,
+                Customer.custom_gdpr_agreement,
+                Customer.custom_pax8_csv_company_id,
+                Customer.custom_vat_id
                 )
                 .where(Customer.custom_email == email)
             .run(as_dict=True)

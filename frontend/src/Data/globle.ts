@@ -66,4 +66,10 @@ export interface Customer {
   custom_identification: string;
   custom_date_of_birth: string;
   custom_hotspot_mac: string;
+  custom_portaone_customers_ids: string;
+  custom_pax8_company_id: string;
+  custom_company_id: string;
+  custom_gdpr_agreement: number;
+  custom_pax8_csv_company_id: string;
+  custom_vat_id: string;
 }
