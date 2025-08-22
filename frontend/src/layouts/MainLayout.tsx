@@ -72,7 +72,7 @@ const CustomerPortal = () => {
 
       if (res.data.message?.success) {
         await auth.logout();
-        await auth.login(currentUser, newPassword);
+        await auth.login({ username: currentUser ?? "", password: newPassword });
       } else {
         alert(res.data.message?.msg || "Failed to change password");
       }
@@ -167,8 +167,8 @@ const CustomerPortal = () => {
         <div className="flex space-x-8">
           {[
             { id: "dashboard", label: "Dashboard", icon: Activity },
-            { id: "invoices", label: "Invoices", icon: CreditCard },
             { id: "subscription", label: "Subscription", icon: BadgeCheck },
+            { id: "invoices", label: "Invoices", icon: CreditCard },
             { id: "support_tickets", label: "Support Tickets", icon: Ticket },
           ].map((tab) => (
             <Link

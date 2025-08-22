@@ -136,6 +136,10 @@ const Home = () => {
                   <span className="font-semibold w-40">Portal Login:</span>
                   <span>{customerDetails.custom_portal_login}</span>
                 </div>
+                <div className="flex">
+                  <span className="font-semibold w-40">Email:</span>
+                  <span>{customerDetails.custom_email}</span>
+                </div>
                 <div className="flex items-center">
                   <span className="font-semibold w-40">Portal Password:</span>
                   <span className="mr-2 w-28">
@@ -152,10 +156,6 @@ const Home = () => {
                   >
                     {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                   </button>
-                </div>
-                <div className="flex">
-                  <span className="font-semibold w-40">Email:</span>
-                  <span>{customerDetails.custom_email}</span>
                 </div>
                 <div className="flex">
                   <span className="font-semibold w-40">Mobile:</span>

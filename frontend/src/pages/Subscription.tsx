@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useFrappeAuth } from "frappe-react-sdk";
-import { CrossIcon } from "lucide-react";
 import type {
-  PlanDetail,
   SubscriptionPlan,
   SubscriptionType,
 } from "../Data/globle";
@@ -13,13 +11,8 @@ const Subscription = () => {
   const [subscriptions, setSubscriptions] = useState<SubscriptionType[]>([]);
   const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
-
-  // Enhancement form states
-  const [showEnhancementForm, setShowEnhancementForm] = useState(false);
-  const [selectedPlans, setSelectedPlans] = useState<PlanDetail[]>([]);
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [amount, setAmount] = useState("");
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
 
   // Fetch current subscriptions
   useEffect(() => {
@@ -55,53 +48,6 @@ const Subscription = () => {
     fetchPlans();
   }, []);
 
-  // Create enhancement request
-  const handleEnhancementRequest = async () => {
-    if (!currentUser) {
-      alert("No logged in user.");
-      return;
-    }
-    if (!startDate || !endDate || !amount || selectedPlans.length === 0) {
-      alert("Please fill all fields and select at least one plan.");
-      return;
-    }
-
-    setLoading(true);
-    try {
-      // fetch customer name by email
-      const customerRes = await axios.get(
-        "/api/method/isp_billing.api.subscription.get_customer_name_by_email",
-        { params: { email: currentUser } }
-      );
-      const customerName = customerRes.data.message;
-
-      // now use that customer name
-      await axios.post(
-        "/api/method/isp_billing.api.payment_setup.create_subscription_with_payment",
-        {
-          customer: customerName,
-          plan: selectedPlans,
-          start_date: startDate,
-          end_date: endDate,
-          amount: amount,
-        }
-      );
-
-      setShowEnhancementForm(false);
-      setSelectedPlans([]);
-      setStartDate("");
-      setEndDate("");
-      setAmount("");
-
-      alert("Subscription enhancement request created successfully!");
-    } catch (error) {
-      console.error("Enhancement creation error:", error);
-      alert("Failed to create subscription enhancement");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleSubscribe = async (planName: string) => {
     if (!currentUser) {
       alert("No logged in user.");
@@ -131,6 +77,8 @@ const Subscription = () => {
       alert("Failed to create quotation");
     } finally {
       setLoading(false);
+      setShowConfirmModal(false);
+      setSelectedPlan(null);
     }
   };
 
@@ -138,24 +86,6 @@ const Subscription = () => {
     return subscriptions.some((sub) =>
       sub.plans.some((p) => p.plan === planName)
     );
-  };
-
-  const togglePlanSelection = (planName: string, cost: number) => {
-    setSelectedPlans((prev) => {
-      const exists = prev.find((p) => p.plan === planName);
-      let updated;
-      if (exists) {
-        // remove if already selected
-        updated = prev.filter((p) => p.plan !== planName);
-      } else {
-        // add with default qty = 1
-        updated = [...prev, { plan: planName, qty: 1, cost }];
-      }
-      // recalc total
-      const total = updated.reduce((sum, p) => sum + p.qty * p.cost, 0);
-      setAmount(total.toString());
-      return updated;
-    });
   };
 
   return (
@@ -171,111 +101,7 @@ const Subscription = () => {
               Manage your subscriptions and explore available plans
             </p>
           </div>
-          <button
-            onClick={() => setShowEnhancementForm(!showEnhancementForm)}
-            className="bg-[#7d4fff] hover:bg-[#6c38fa] text-white px-4 py-2 rounded-lg shadow"
-          >
-            Create Enhancement Request
-          </button>
         </div>
-
-        {/* Enhancement Form - Toggle */}
-        {showEnhancementForm && (
-          <div className="bg-black/15 shadow-lg p-6 mb-8 fixed top-0 left-0 h-full w-full z-50">
-            <div className="bg-white rounded-2xl shadow-lg p-6 mb-10 top-1/2 left-1/2 transform translate-x-1/2 translate-y-[15%] max-w-3xl w-full">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                  Create Subscription Enhancement
-                </h2>
-                <button
-                  onClick={() => setShowEnhancementForm(!showEnhancementForm)}
-                >
-                  <CrossIcon className="transform rotate-45" />
-                </button>
-              </div>
-              {/* Start & End Date */}
-              <div className="grid grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="text-sm font-medium text-gray-700">
-                    Start Date
-                  </label>
-                  <input
-                    type="date"
-                    className="w-full border rounded-lg p-2 mt-1"
-                    value={startDate}
-                    onChange={(e) => setStartDate(e.target.value)}
-                  />
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-700">
-                    End Date
-                  </label>
-                  <input
-                    type="date"
-                    className="w-full border rounded-lg p-2 mt-1"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              {/* Auto Calculated Amount */}
-              <div className="mb-4">
-                <label className="text-sm font-medium text-gray-700">
-                  Amount
-                </label>
-                <input
-                  type="number"
-                  className="w-full border rounded-lg p-2 mt-1 bg-gray-100"
-                  value={amount}
-                  readOnly
-                />
-              </div>
-
-              {/* Plan Selection */}
-              <div className="mb-4">
-                <label className="text-sm font-medium text-gray-700">
-                  Select Plans
-                </label>
-                <div className="grid grid-cols-2 gap-4 mt-2">
-                  {plans.map((plan) => {
-                    const selected = selectedPlans.find(
-                      (p) => p.plan === plan.name
-                    );
-                    return (
-                      <div
-                        key={plan.name}
-                        className={`p-4 border rounded-lg cursor-pointer ${
-                          selected
-                            ? "border-[#7d4fff] bg-blue-50"
-                            : "border-gray-200"
-                        }`}
-                        onClick={() =>
-                          togglePlanSelection(plan.name, plan.cost)
-                        }
-                      >
-                        <p className="text-gray-500 text-sm">
-                          {plan.currency} {plan.cost} / {plan.item}
-                        </p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              <button
-                onClick={handleEnhancementRequest}
-                disabled={loading}
-                className="w-full bg-[#7d4fff] hover:bg-[#6c38fa] disabled:bg-[#9e7aff] text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200"
-              >
-                {loading ? "Processing..." : "Create Enhancement Request"}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* === Keep your existing subscriptions + available plans sections === */}
-        {/* Current Subscriptions + Available Plans here (unchanged from your first code) */}
 
         {loading ? (
           <div className="flex items-center justify-center mt-20">
@@ -423,7 +249,6 @@ const Subscription = () => {
             </div>
 
             {/* Available Plans Section */}
-            {/* Available Plans Section */}
             <div className="mb-10">
               <h2 className="text-2xl font-semibold text-gray-800 mb-4">
                 {subscriptions.length > 0
@@ -466,7 +291,7 @@ const Subscription = () => {
                       </span>
                     </div>
 
-                    {plan.features?.length > 0 && (
+                    {Array.isArray(plan.features) && plan.features.length > 0 && (
                       <ul className="mb-6 text-sm text-gray-600 space-y-2">
                         {plan.features.map((feature, index) => (
                           <li key={index} className="flex items-center">
@@ -489,9 +314,12 @@ const Subscription = () => {
 
                     {!isCurrentPlan(plan.name) && (
                       <button
-                        onClick={() => handleSubscribe(plan.name)}
+                        onClick={() => {
+                          setSelectedPlan(plan.name);
+                          setShowConfirmModal(true);
+                        }}
                         disabled={loading}
-                        className="w-full bg-[#7d4fff] hover:bg-[#6c38fa] disabled:bg-blue-400 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 disabled:cursor-not-allowed"
+                        className="w-full bg-[#7d4fff] hover:bg-[#6c38fa] disabled:bg-blue-400 text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 disabled:cursor-not-allowed cursor-pointer"
                       >
                         {loading ? "Processing..." : "Subscribe Now"}
                       </button>
@@ -500,6 +328,34 @@ const Subscription = () => {
                 ))}
               </div>
             </div>
+
+            {/* Confirmation Modal */}
+            {showConfirmModal && selectedPlan && (
+              <div className="fixed inset-0 flex items-center justify-center bg-opacity-50 z-50">
+                <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full">
+                  <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                    Confirm Subscription
+                  </h3>
+                  <p className="text-gray-600 mb-6">
+                    Are you sure you want to subscribe to <b>{selectedPlan}</b>?
+                  </p>
+                  <div className="flex justify-end gap-3">
+                    <button
+                      onClick={() => setShowConfirmModal(false)}
+                      className="px-4 py-2 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 cursor-pointer"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => handleSubscribe(selectedPlan)}
+                      className="px-4 py-2 rounded-lg bg-[#7d4fff] text-white hover:bg-[#6c38fa] cursor-pointer"
+                    >
+                      Confirm
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>
