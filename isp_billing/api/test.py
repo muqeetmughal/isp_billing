@@ -4,29 +4,6 @@ from frappe.query_builder import DocType
 
 
 
-def send_welcome_email(doc, method):
-   
-    welcome_email_template = frappe.get_doc("Email Template", "Welcome Email")
-
-    subject = welcome_email_template.subject
-    message = frappe.render_template(welcome_email_template.response, {"doc": doc})
-
-    frappe.sendmail(
-        recipients=[doc.custom_email],
-        subject=subject,
-        message=message,
-        delayed=False
-    )
-    
-    return(f"Welcome email sent to {doc.custom_email} for Customer {doc.name}.")
-
-
-
-
-
-
-
-
 @frappe.whitelist(allow_guest=True)
 def create_lead(name, pipline_status, partner, location, city, email, billing_email, mobile_no, street, zip_code, date_added, billing_type, score):
 
@@ -143,38 +120,6 @@ def create_gocardless_mandate():
 
 
 
-# when issue create then it will send sla document to customer 
-def get_isp_billing_settings():
-    sla = frappe.get_single("Isp Billing Setting")
-    return sla.sla_document
-
-def send_sla_on_issue_create(doc, method):
-    """Send SLA email with document when Issue is created"""
-    if not doc.raised_by:
-        return
-
-    # Get SLA document
-    sla_document = get_isp_billing_settings()
-
-    # Get Email Template
-    email_template = frappe.get_doc("Email Template", "Send SLA when Issue create")
-    subject = frappe.render_template(email_template.subject, {"doc": doc})
-    message = frappe.render_template(email_template.response, {"doc": doc})
-
-    # Send mail with attachment
-    attachments = []
-    if sla_document:
-        file_doc = frappe.get_doc("File", {"file_url": sla_document})
-        attachments.append({"fname": file_doc.file_name, "fcontent": file_doc.get_content()})
-
-    frappe.sendmail(
-        recipients=[doc.raised_by],
-        subject=subject,
-        message=message,
-        attachments=attachments,
-        reference_doctype=doc.doctype,
-        reference_name=doc.name
-    )
 
 
 

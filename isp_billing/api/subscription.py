@@ -83,6 +83,14 @@ def set_user_password(email, password):
 
 
 
+
+
+
+
+
+
+
+
 @frappe.whitelist(allow_guest=True)
 def get_customer_by_email(email):
     Customer = DocType("Customer")

@@ -167,11 +167,11 @@ fixtures = [
 
 
 doc_events = {
-    "Customer": {
-        "after_insert": "isp_billing.api.test.send_welcome_email"
-    },
     "Issue": {
-        "after_insert": "isp_billing.api.test.send_sla_on_issue_create"
+        "after_insert": "isp_billing.api.issue.send_sla_on_issue_create"
+    },
+    "Customer": {
+        "after_insert": "isp_billing.api.customer.create_portal_user"
     }
 
 }
