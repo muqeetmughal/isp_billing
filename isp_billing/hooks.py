@@ -21,6 +21,12 @@ fixtures = [
     },
     {
         "dt": "Web Form"
+    },
+    {
+        "dt": "Workspace",
+        "filters": [
+            ["name", "=", "CLI SECURE"]
+        ]
     }
 
 ]
@@ -167,11 +173,14 @@ fixtures = [
 
 
 doc_events = {
-    "Issue": {
-        "after_insert": "isp_billing.api.issue.send_sla_on_issue_create"
-    },
+    # "Issue": {
+    #     "after_insert": "isp_billing.api.issue.send_sla_on_issue_create"
+    # },
     "Customer": {
         "after_insert": "isp_billing.api.customer.create_portal_user"
+    },
+    "Issue": {
+        "after_insert": "isp_billing.api.issue.send_sla_on_issue_create"
     }
 
 }

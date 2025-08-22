@@ -1,0 +1,143 @@
+[
+ {
+  "charts": [
+   {
+    "chart_name": "Customer",
+    "label": "Customers",
+    "parent": "CLI SECURE",
+    "parentfield": "charts",
+    "parenttype": "Workspace"
+   },
+   {
+    "chart_name": "issue",
+    "label": "Support Tickets",
+    "parent": "CLI SECURE",
+    "parentfield": "charts",
+    "parenttype": "Workspace"
+   },
+   {
+    "chart_name": "Outgoing Bills (Sales Invoice)",
+    "label": "Invoice",
+    "parent": "CLI SECURE",
+    "parentfield": "charts",
+    "parenttype": "Workspace"
+   },
+   {
+    "chart_name": "Active Subscriber",
+    "label": "Active Subscriber",
+    "parent": "CLI SECURE",
+    "parentfield": "charts",
+    "parenttype": "Workspace"
+   }
+  ],
+  "content": "[{\"id\":\"yUQXeafBte\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">CLI SECURE</span>\",\"col\":12}},{\"id\":\"T6X74_1Nz0\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Customer\",\"col\":3}},{\"id\":\"2zD-Zz4eve\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Invoices\",\"col\":3}},{\"id\":\"VhF4gfAolY\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Support Tickets\",\"col\":3}},{\"id\":\"_OGu-sqhiY\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Active Subscriptions\",\"col\":3}},{\"id\":\"0484AcXdD-\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Total Plans\",\"col\":7}},{\"id\":\"WIqhR6p4Jw\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Invoice\",\"col\":6}},{\"id\":\"5ZC6lhS6H3\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Active Subscriber\",\"col\":6}},{\"id\":\"TylNmiFYxn\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Support Tickets\",\"col\":6}},{\"id\":\"nYV1bUek_3\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Customers\",\"col\":6}}]",
+  "custom_blocks": [],
+  "docstatus": 0,
+  "doctype": "Workspace",
+  "for_user": "",
+  "hide_custom": 0,
+  "icon": "branch",
+  "indicator_color": "green",
+  "is_hidden": 0,
+  "label": "CLI SECURE",
+  "links": [],
+  "modified": "2025-08-22 22:48:31.506377",
+  "module": "Isp Billing",
+  "name": "CLI SECURE",
+  "number_cards": [],
+  "parent_page": "",
+  "public": 1,
+  "quick_lists": [],
+  "restrict_to_domain": null,
+  "roles": [],
+  "sequence_id": 2.0,
+  "shortcuts": [
+   {
+    "color": "Yellow",
+    "doc_view": "List",
+    "format": null,
+    "icon": null,
+    "kanban_board": null,
+    "label": "Customer",
+    "link_to": "Customer",
+    "parent": "CLI SECURE",
+    "parentfield": "shortcuts",
+    "parenttype": "Workspace",
+    "report_ref_doctype": null,
+    "restrict_to_domain": null,
+    "stats_filter": "[]",
+    "type": "DocType",
+    "url": null
+   },
+   {
+    "color": "Pink",
+    "doc_view": "List",
+    "format": null,
+    "icon": null,
+    "kanban_board": null,
+    "label": "Active Subscriptions",
+    "link_to": "Subscription",
+    "parent": "CLI SECURE",
+    "parentfield": "shortcuts",
+    "parenttype": "Workspace",
+    "report_ref_doctype": null,
+    "restrict_to_domain": null,
+    "stats_filter": "[[\"Subscription\",\"status\",\"=\",\"Active\",false]]",
+    "type": "DocType",
+    "url": null
+   },
+   {
+    "color": "Red",
+    "doc_view": "List",
+    "format": null,
+    "icon": null,
+    "kanban_board": null,
+    "label": "Support Tickets",
+    "link_to": "Issue",
+    "parent": "CLI SECURE",
+    "parentfield": "shortcuts",
+    "parenttype": "Workspace",
+    "report_ref_doctype": null,
+    "restrict_to_domain": null,
+    "stats_filter": "[[\"Issue\",\"status\",\"=\",\"Open\",false]]",
+    "type": "DocType",
+    "url": null
+   },
+   {
+    "color": "Cyan",
+    "doc_view": "List",
+    "format": null,
+    "icon": null,
+    "kanban_board": null,
+    "label": "Total Plans",
+    "link_to": "Subscription Plan",
+    "parent": "CLI SECURE",
+    "parentfield": "shortcuts",
+    "parenttype": "Workspace",
+    "report_ref_doctype": null,
+    "restrict_to_domain": null,
+    "stats_filter": "[]",
+    "type": "DocType",
+    "url": null
+   },
+   {
+    "color": "Green",
+    "doc_view": "List",
+    "format": null,
+    "icon": null,
+    "kanban_board": null,
+    "label": "Invoices",
+    "link_to": "Sales Invoice",
+    "parent": "CLI SECURE",
+    "parentfield": "shortcuts",
+    "parenttype": "Workspace",
+    "report_ref_doctype": null,
+    "restrict_to_domain": null,
+    "stats_filter": "[[\"Sales Invoice\",\"status\",\"=\",\"Paid\",false]]",
+    "type": "DocType",
+    "url": null
+   }
+  ],
+  "title": "CLI SECURE"
+ }
+]

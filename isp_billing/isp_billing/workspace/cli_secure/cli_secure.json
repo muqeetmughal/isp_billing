@@ -1,0 +1,87 @@
+{
+ "charts": [
+  {
+   "chart_name": "Customer",
+   "label": "Customers"
+  },
+  {
+   "chart_name": "issue",
+   "label": "Support Tickets"
+  },
+  {
+   "chart_name": "Outgoing Bills (Sales Invoice)",
+   "label": "Invoice"
+  },
+  {
+   "chart_name": "Active Subscriber",
+   "label": "Active Subscriber"
+  }
+ ],
+ "content": "[{\"id\":\"yUQXeafBte\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">CLI SECURE</span>\",\"col\":12}},{\"id\":\"T6X74_1Nz0\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Customer\",\"col\":3}},{\"id\":\"2zD-Zz4eve\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Invoices\",\"col\":3}},{\"id\":\"VhF4gfAolY\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Support Tickets\",\"col\":3}},{\"id\":\"_OGu-sqhiY\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Active Subscriptions\",\"col\":3}},{\"id\":\"0484AcXdD-\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Total Plans\",\"col\":7}},{\"id\":\"WIqhR6p4Jw\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Invoice\",\"col\":6}},{\"id\":\"5ZC6lhS6H3\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Active Subscriber\",\"col\":6}},{\"id\":\"TylNmiFYxn\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Support Tickets\",\"col\":6}},{\"id\":\"nYV1bUek_3\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Customers\",\"col\":6}}]",
+ "creation": "2025-08-22 21:50:54.057263",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "branch",
+ "idx": 0,
+ "indicator_color": "green",
+ "is_hidden": 0,
+ "label": "CLI SECURE",
+ "links": [],
+ "modified": "2025-08-22 22:48:31.506377",
+ "modified_by": "Administrator",
+ "module": "Isp Billing",
+ "name": "CLI SECURE",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "roles": [],
+ "sequence_id": 2.0,
+ "shortcuts": [
+  {
+   "color": "Yellow",
+   "doc_view": "List",
+   "label": "Customer",
+   "link_to": "Customer",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Pink",
+   "doc_view": "List",
+   "label": "Active Subscriptions",
+   "link_to": "Subscription",
+   "stats_filter": "[[\"Subscription\",\"status\",\"=\",\"Active\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Red",
+   "doc_view": "List",
+   "label": "Support Tickets",
+   "link_to": "Issue",
+   "stats_filter": "[[\"Issue\",\"status\",\"=\",\"Open\",false]]",
+   "type": "DocType"
+  },
+  {
+   "color": "Cyan",
+   "doc_view": "List",
+   "label": "Total Plans",
+   "link_to": "Subscription Plan",
+   "stats_filter": "[]",
+   "type": "DocType"
+  },
+  {
+   "color": "Green",
+   "doc_view": "List",
+   "label": "Invoices",
+   "link_to": "Sales Invoice",
+   "stats_filter": "[[\"Sales Invoice\",\"status\",\"=\",\"Paid\",false]]",
+   "type": "DocType"
+  }
+ ],
+ "title": "CLI SECURE"
+}

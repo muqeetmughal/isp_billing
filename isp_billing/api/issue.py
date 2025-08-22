@@ -60,22 +60,22 @@ def create_issue(subject, description, email, customer, issue_type, group, selec
     frappe.db.commit()
 
     # Get admin email from settings
-    settings = get_isp_billing_settings()
-    admin_email = settings.admin_email
+    # settings = get_isp_billing_settings()
+    # admin_email = settings.admin_email
 
-    # Send notification email to admin
-    frappe.sendmail(
-        recipients=[admin_email],
-        subject=f"New Issue Created: {subject}",
-        message=f"""
-            <p><strong>Subject:</strong> {subject}</p>
-            <p><strong>Description:</strong> {description}</p>
-            <p><strong>Customer:</strong> {customer}</p>
-            <p><strong>Raised By:</strong> {email}</p>
-            <p><strong>Issue Type:</strong> {issue_type}</p>
-            <p><strong>Issue Link:</strong> <a href="{frappe.utils.get_url()}/app/issue/{issue.name}">{issue.name}</a></p>
-        """
-    )
+    # # Send notification email to admin
+    # frappe.sendmail(
+    #     recipients=[admin_email],
+    #     subject=f"New Issue Created: {subject}",
+    #     message=f"""
+    #         <p><strong>Subject:</strong> {subject}</p>
+    #         <p><strong>Description:</strong> {description}</p>
+    #         <p><strong>Customer:</strong> {customer}</p>
+    #         <p><strong>Raised By:</strong> {email}</p>
+    #         <p><strong>Issue Type:</strong> {issue_type}</p>
+    #         <p><strong>Issue Link:</strong> <a href="{frappe.utils.get_url()}/app/issue/{issue.name}">{issue.name}</a></p>
+    #     """
+    # )
 
     frappe.local.response.http_status_code = 201
 
@@ -184,3 +184,16 @@ def send_sla_on_issue_create(doc, method):
         reference_doctype=doc.doctype,
         reference_name=doc.name
     )
+
+
+
+
+
+
+
+
+# We need gocardless test access token that we use this to add any custmoer bank detail for test purpose
+# please give me test access token for gocardless
+
+
+
