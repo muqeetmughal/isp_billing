@@ -34,7 +34,7 @@ const CustomerPortal = () => {
   useEffect(() => {
     const fetchCustomerName = async () => {
       const customerRes = await axios.get(
-        "/api/method/isp_billing.api.subscription.get_customer_name_by_email",
+        "/api/method/isp_billing.api.customer.get_customer_name_by_email",
         { params: { email: currentUser } }
       );
       const customerName = customerRes.data.message;
@@ -65,7 +65,7 @@ const CustomerPortal = () => {
   const handleChangePassword = async () => {
     if (!newPassword) return;
     try {
-      const res = await axios.post("/api/method/isp_billing.api.subscription.set_user_password", {
+      const res = await axios.post("/api/method/isp_billing.api.customer.set_user_password", {
         email: currentUser,
         password: newPassword,
       });

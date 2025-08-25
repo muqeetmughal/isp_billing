@@ -25,7 +25,7 @@ const Home = () => {
     const fetchCustomerDetails = async () => {
       try {
         const res = await axios.get(
-          "/api/method/isp_billing.api.subscription.get_customer",
+          "/api/method/isp_billing.api.customer.get_customer",
           { params: { email: currentUser } }
         );
         if (res.data.message && res.data.message.length > 0) {
@@ -100,6 +100,7 @@ const Home = () => {
       </div>
 
       {/* Stats Cards */}
+
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-100 flex flex-col items-center p-6">
         <div className="backdrop-blur-md bg-white/30 border border-white/40 rounded-2xl shadow-2xl p-10 w-full animate-fade-in">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -127,122 +128,135 @@ const Home = () => {
           </div>
           {/* Customer Details */}
 
-          {customerDetails && (
-            <div className="bg-white shadow-lg rounded-lg p-6 my-6">
-              <h2 className="text-2xl font-bold mb-4">Your Profile</h2>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 text-gray-700">
-                <div className="flex">
-                  <span className="font-semibold w-40">Portal Login:</span>
-                  <span>{customerDetails.custom_portal_login}</span>
-                </div>
-                <div className="flex">
-                  <span className="font-semibold w-40">Email:</span>
-                  <span>{customerDetails.custom_email}</span>
-                </div>
-                <div className="flex items-center">
-                  <span className="font-semibold w-40">Portal Password:</span>
-                  <span className="mr-2 w-28">
-                    {showPassword
-                      ? customerDetails?.custom_portal_password
-                      : "•".repeat(
-                          customerDetails?.custom_portal_password?.length || 0
-                        )}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword((prev) => !prev)}
-                    className="text-gray-500 hover:text-gray-700"
-                  >
-                    {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                  </button>
-                </div>
-                <div className="flex">
-                  <span className="font-semibold w-40">Mobile:</span>
-                  <span>{customerDetails.custom_mobile_no}</span>
-                </div>
-                <div className="flex">
-                  <span className="font-semibold w-40">Billing Email:</span>
-                  <span>{customerDetails.custom_billing_email}</span>
-                </div>
-                <div className="flex">
-                  <span className="font-semibold w-40">Partner:</span>
-                  <span>{customerDetails.custom_partner}</span>
-                </div>
-                <div className="flex">
-                  <span className="font-semibold w-40">Billing Type:</span>
-                  <span>{customerDetails.custom_billing_type}</span>
-                </div>
-                <div className="flex">
-                  <span className="font-semibold w-40">Company:</span>
-                  <span>{customerDetails.custom_company}</span>
-                </div>
-                <div className="flex">
-                  <span className="font-semibold w-40">Reseller:</span>
-                  <span>{customerDetails.custom_reseller}</span>
-                </div>
-                <div className="flex">
-                  <span className="font-semibold w-40">Agent:</span>
-                  <span>{customerDetails.custom_agent}</span>
-                </div>
-                <div className="flex">
-                  <span className="font-semibold w-40">Date of Birth:</span>
-                  <span>{customerDetails.custom_date_of_birth}</span>
-                </div>
-                <div className="flex">
-                  <span className="font-semibold w-40">Hotspot MAC:</span>
-                  <span>{customerDetails.custom_hotspot_mac}</span>
-                </div>
-                <div className="flex">
-                  <span className="font-semibold w-40">Identification:</span>
-                  <span>{customerDetails.custom_identification}</span>
-                </div>
-                <div className="flex">
-                  <span className="font-semibold w-40">Location:</span>
-                  <span>{customerDetails.custom_location}</span>
-                </div>
-                <div className="flex">
-                  <span className="font-semibold w-40">Street:</span>
-                  <span>{customerDetails.custom_street}</span>
-                </div>
-                <div className="flex">
-                  <span className="font-semibold w-40">City:</span>
-                  <span>{customerDetails.custom_city}</span>
-                </div>
-                <div className="flex">
-                  <span className="font-semibold w-40">Zip Code:</span>
-                  <span>{customerDetails.custom_zip_code}</span>
-                </div>
-                <div className="flex">
-                  <span className="font-semibold w-40">Date Added:</span>
-                  <span>{customerDetails.custom_date_added}</span>
-                </div>
-                <div className="flex">
-                  <span className="font-semibold w-40">Portaone Customers IDs:</span>
-                  <span>{customerDetails.custom_portaone_customers_ids}</span>
-                </div>
-                <div className="flex">
-                  <span className="font-semibold w-40">Pax8 Company ID:</span>
-                  <span>{customerDetails.custom_pax8_company_id}</span>
-                </div>
-                <div className="flex">
-                  <span className="font-semibold w-40">Company ID:</span>
-                  <span>{customerDetails.custom_company_id}</span>
-                </div>
-                <div className="flex">
-                  <span className="font-semibold w-40">GDPR Agreement:</span>
-                  <span>{customerDetails.custom_gdpr_agreement}</span>
-                </div>
-                <div className="flex">
-                  <span className="font-semibold w-40">Pax8 Csv Company ID:</span>
-                  <span>{customerDetails.custom_pax8_csv_company_id}</span>
-                </div>
-                <div className="flex">
-                  <span className="font-semibold w-40">VAT ID:</span>
-                  <span>{customerDetails.custom_vat_id}</span>
-                </div>
+          {loading ? (
+            <div className="flex justify-center mt-20">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#7d4fff] mx-auto mb-2"></div>
+                <p>Loading profile...</p>
               </div>
             </div>
+          ) : (
+            customerDetails && (
+              <div className="bg-white shadow-lg rounded-lg p-6 my-6">
+                <h2 className="text-2xl font-bold mb-4">Your Profile</h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8 text-gray-700">
+                  <div className="flex">
+                    <span className="font-semibold w-40">Portal Login:</span>
+                    <span>{customerDetails.custom_portal_login}</span>
+                  </div>
+                  <div className="flex">
+                    <span className="font-semibold w-40">Email:</span>
+                    <span>{customerDetails.custom_email}</span>
+                  </div>
+                  <div className="flex items-center">
+                    <span className="font-semibold w-40">Portal Password:</span>
+                    <span className="mr-2 w-28">
+                      {showPassword
+                        ? customerDetails?.custom_portal_password
+                        : "•".repeat(
+                            customerDetails?.custom_portal_password?.length || 0
+                          )}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      className="text-gray-500 hover:text-gray-700 cursor-pointer"
+                    >
+                      {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                  <div className="flex">
+                    <span className="font-semibold w-40">Mobile:</span>
+                    <span>{customerDetails.custom_mobile_no}</span>
+                  </div>
+                  <div className="flex">
+                    <span className="font-semibold w-40">Billing Email:</span>
+                    <span>{customerDetails.custom_billing_email}</span>
+                  </div>
+                  <div className="flex">
+                    <span className="font-semibold w-40">Partner:</span>
+                    <span>{customerDetails.custom_partner}</span>
+                  </div>
+                  <div className="flex">
+                    <span className="font-semibold w-40">Billing Type:</span>
+                    <span>{customerDetails.custom_billing_type}</span>
+                  </div>
+                  <div className="flex">
+                    <span className="font-semibold w-40">Company:</span>
+                    <span>{customerDetails.custom_company}</span>
+                  </div>
+                  <div className="flex">
+                    <span className="font-semibold w-40">Reseller:</span>
+                    <span>{customerDetails.custom_reseller}</span>
+                  </div>
+                  <div className="flex">
+                    <span className="font-semibold w-40">Agent:</span>
+                    <span>{customerDetails.custom_agent}</span>
+                  </div>
+                  <div className="flex">
+                    <span className="font-semibold w-40">Date of Birth:</span>
+                    <span>{customerDetails.custom_date_of_birth}</span>
+                  </div>
+                  <div className="flex">
+                    <span className="font-semibold w-40">Hotspot MAC:</span>
+                    <span>{customerDetails.custom_hotspot_mac}</span>
+                  </div>
+                  <div className="flex">
+                    <span className="font-semibold w-40">Identification:</span>
+                    <span>{customerDetails.custom_identification}</span>
+                  </div>
+                  <div className="flex">
+                    <span className="font-semibold w-40">Location:</span>
+                    <span>{customerDetails.custom_location}</span>
+                  </div>
+                  <div className="flex">
+                    <span className="font-semibold w-40">Street:</span>
+                    <span>{customerDetails.custom_street}</span>
+                  </div>
+                  <div className="flex">
+                    <span className="font-semibold w-40">City:</span>
+                    <span>{customerDetails.custom_city}</span>
+                  </div>
+                  <div className="flex">
+                    <span className="font-semibold w-40">Zip Code:</span>
+                    <span>{customerDetails.custom_zip_code}</span>
+                  </div>
+                  <div className="flex">
+                    <span className="font-semibold w-40">Date Added:</span>
+                    <span>{customerDetails.custom_date_added}</span>
+                  </div>
+                  <div className="flex">
+                    <span className="font-semibold w-40">
+                      Portaone Customers IDs:
+                    </span>
+                    <span>{customerDetails.custom_portaone_customers_ids}</span>
+                  </div>
+                  <div className="flex">
+                    <span className="font-semibold w-40">Pax8 Company ID:</span>
+                    <span>{customerDetails.custom_pax8_company_id}</span>
+                  </div>
+                  <div className="flex">
+                    <span className="font-semibold w-40">Company ID:</span>
+                    <span>{customerDetails.custom_company_id}</span>
+                  </div>
+                  <div className="flex">
+                    <span className="font-semibold w-40">GDPR Agreement:</span>
+                    <span>{customerDetails.custom_gdpr_agreement}</span>
+                  </div>
+                  <div className="flex">
+                    <span className="font-semibold w-40">
+                      Pax8 Csv Company ID:
+                    </span>
+                    <span>{customerDetails.custom_pax8_csv_company_id}</span>
+                  </div>
+                  <div className="flex">
+                    <span className="font-semibold w-40">VAT ID:</span>
+                    <span>{customerDetails.custom_vat_id}</span>
+                  </div>
+                </div>
+              </div>
+            )
           )}
         </div>
       </div>

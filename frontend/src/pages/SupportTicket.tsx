@@ -155,7 +155,7 @@ const SupportTicket = () => {
       const fetchCustomer = async () => {
         try {
           const customerRes = await axios.get(
-            "/api/method/isp_billing.api.subscription.get_customer_name_by_email",
+            "/api/method/isp_billing.api.customer.get_customer_name_by_email",
             { params: { email: currentUser } }
           );
           const customerName = customerRes.data.message;
@@ -177,7 +177,7 @@ const SupportTicket = () => {
         <h1 className="text-2xl font-bold text-gray-800">Customer Issues</h1>
         <button
           onClick={() => setModalOpen(true)}
-          className="bg-[#7d4fff] text-white px-4 py-2 rounded hover:bg-[#6c38fa]"
+          className="bg-[#7d4fff] text-white px-4 py-2 rounded hover:bg-[#6c38fa] cursor-pointer"
         >
           + New Ticket
         </button>
@@ -344,7 +344,7 @@ const SupportTicket = () => {
                   type="button"
                   onClick={handleModalClose}
                   disabled={submitting}
-                  className="flex-1 bg-gray-200 text-gray-700 py-2.5 px-4 rounded-lg shadow hover:bg-gray-300 transition disabled:opacity-70"
+                  className="flex-1 bg-gray-200 text-gray-700 py-2.5 px-4 rounded-lg shadow hover:bg-gray-300 transition disabled:opacity-70 cursor-pointer"
                 >
                   Cancel
                 </button>
@@ -365,7 +365,7 @@ const SupportTicket = () => {
       <h2 className="text-2xl font-semibold text-gray-800">🎫 Ticket Details</h2>
       <button
         onClick={() => setViewModalOpen(false)}
-        className="text-gray-500 hover:text-gray-800 text-2xl leading-none"
+        className="text-gray-500 hover:text-gray-800 text-2xl leading-none cursor-pointer"
       >
         ×
       </button>
@@ -452,7 +452,7 @@ const SupportTicket = () => {
     <div className="mt-6 text-right">
       <button
         onClick={() => setViewModalOpen(false)}
-        className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-5 py-2.5 rounded-xl shadow hover:opacity-90 transition"
+        className="bg-gradient-to-r from-purple-500 to-indigo-500 text-white px-5 py-2.5 rounded-xl shadow hover:opacity-90 transition cursor-pointer"
       >
         Close
       </button>
@@ -556,7 +556,7 @@ const SupportTicket = () => {
                     </td>
                     <td className="px-6 py-4 text-sm">
                       <button
-                        className="bg-[#7d4fff] text-white px-4 py-1.5 rounded-lg shadow hover:bg-[#6c38fa] transition"
+                        className="bg-[#7d4fff] text-white px-4 py-1.5 rounded-lg shadow hover:bg-[#6c38fa] transition cursor-pointer"
                         onClick={() => {
                           setSelectedTicket(issue);
                           setViewModalOpen(true);

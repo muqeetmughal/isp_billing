@@ -60,36 +60,49 @@ def get_customer():
                 Customer.custom_agent,
                 Customer.custom_identification,
                 Customer.custom_date_of_birth,
-                Customer.custom_hotspot_mac
+                Customer.custom_hotspot_mac,
+                Customer.custom_geo_data
                 )
             .run(as_dict=True)
     )
     return customers
 
+import json
+# def get_customer():
+#     Customer = DocType("Customer")
+    
+#     customers = (
+#         frappe.qb.from_(Customer)
+#             .select(
+#                 Customer.name,
+#                 Customer.customer_name,
+#                 Customer.custom_geo_data
+#             )
+#             .run(as_dict=True)
+#     )
+
+#     # Parse geo_data and extract coordinates
+#     for geo_data in customers:
+#         if geo_data.get("custom_geo_data"):
+#             try:
+#                 geo_json = json.loads(geo_data["custom_geo_data"])
+#                 coordinates = (
+#                     geo_json["features"][0]["geometry"]["coordinates"]
+#                     if geo_json.get("features")
+#                     else None
+#                 )
+#                 geo_data["coordinates"] = coordinates
+#             except Exception:
+#                 geo_data["coordinates"] = None
+#         else:
+#             geo_data["coordinates"] = None
+
+#     return customers
 
 
 
 
 # Create Payment Request for a Sales Invoice
-def create_payment_request():
-    pr = frappe.get_doc({
-        "doctype": "Payment Request",
-        "payment_gateway": "GoCardless-YourGatewayName",
-        "reference_doctype": "Sales Invoice",
-        "reference_name": "ACC-SINV-2025-00020",
-        "party_type": "Customer",
-        "party": "Suleman Saeed",
-        "currency": "USD",
-        "grand_total": 100,
-        "email_to": "salmansaeed7272@gmail.com"
-    })
-    pr.insert()
-    pr.submit()
-    return {
-        "msg": "Payment Request created successfully",
-        "payment_request": pr.name,
-        "success": True
-    }
 
 
 def create_gocardless_mandate():
@@ -108,63 +121,6 @@ def create_gocardless_mandate():
         "mandate": doc.name,
         "success": True
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# import frappe
-# from frappe.utils.password import update_password
-# from frappe.utils import random_string
-
-# def send_password_reset_email(user_email):
-#     """Send reset password link using Email Template"""
-
-#     # Generate reset link
-#     user = frappe.get_doc("User", user_email)
-#     key = random_string(32)
-#     user.reset_password_key = key
-#     user.db_update()
-
-#     reset_link = f"{frappe.utils.get_url()}/update-password?key={key}"
-
-#     # Fetch Email Template
-#     email_template = frappe.get_doc("Email Template", "Reset User Password")
-#     subject = frappe.render_template(email_template.subject, {"user": user, "reset_link": reset_link})
-#     message = frappe.render_template(email_template.response, {"user": user, "reset_link": reset_link})
-
-#     # Send Email
-#     frappe.sendmail(
-#         recipients=[user_email],
-#         subject=subject,
-#         message=message,
-#         reference_doctype="User",
-#         reference_name=user.name
-#     )
-
-# def send_password_setup_mail(doc, method):
-#     """Auto-send password setup email when new User created"""
-#     if doc.email:
-#         send_password_reset_email(doc.email)
 
 
 
