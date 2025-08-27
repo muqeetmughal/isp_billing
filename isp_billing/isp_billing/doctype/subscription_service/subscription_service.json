@@ -1,0 +1,229 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-08-27 15:58:28.216675",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "plan",
+  "description",
+  "quantity",
+  "unit",
+  "price",
+  "pay_period",
+  "billing_start_date",
+  "billing_end_date",
+  "discount",
+  "discount_value",
+  "discount_start_date",
+  "discount_end_date",
+  "status",
+  "location",
+  "cli",
+  "static_ip",
+  "pppoe_password",
+  "ip_look_default_apn",
+  "realm",
+  "access_device",
+  "router",
+  "service_login",
+  "service_password",
+  "ipv4_assignment_method",
+  "ipv6_network",
+  "delegated_ipv6_network",
+  "macs",
+  "port_id",
+  "plan_options_section",
+  "voice_device",
+  "direction",
+  "phone"
+ ],
+ "fields": [
+  {
+   "fieldname": "plan",
+   "fieldtype": "Link",
+   "label": "Plan",
+   "options": "Subscription Plan"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  },
+  {
+   "fieldname": "quantity",
+   "fieldtype": "Int",
+   "label": "Quantity"
+  },
+  {
+   "fieldname": "unit",
+   "fieldtype": "Data",
+   "label": "Unit"
+  },
+  {
+   "fieldname": "price",
+   "fieldtype": "Currency",
+   "label": "Price"
+  },
+  {
+   "fieldname": "pay_period",
+   "fieldtype": "Select",
+   "label": "Pay Period",
+   "options": "Default\nPost Paid\n1 Charge period\n2 Charge Periods\n3 Charge Periods\n4 Charge Periods\n5 Charge Periods\n6 Charge Periods\n7 Charge Periods\n8 Charge Periods\n9 Charge Periods\n10 Charge Periods\n11 Charge Periods\n12 Charge Periods\n13 Charge Periods\n14 Charge Periods\n15 Charge Periods\n16 Charge Periods\n17 Charge Periods\n18 Charge Periods\n19 Charge Periods\n20 Charge Periods\n21 Charge Periods\n22 Charge Periods\n23 Charge Periods\n24 Charge Periods\n25 Charge Periods\n26 Charge Periods\n27 Charge Periods\n28 Charge Periods\n29 Charge Periods\n30 Charge Periods\n31 Charge Periods\n32 Charge Periods\n33 Charge Periods\n34 Charge Periods\n35 Charge Periods\n36 Charge Periods\n37 Charge Periods\n38 Charge Periods\n39 Charge Periods\n40 Charge Periods\n41 Charge Periods\n42 Charge Periods\n43 Charge Periods\n44 Charge Periods\n45 Charge Periods\n46 Charge Periods\n47 Charge Periods\n48 Charge Periods\n49 Charge Periods\n50 Charge Periods\n51 Charge Periods\n52 Charge Periods\n53 Charge Periods\n54 Charge Periods\n55 Charge Periods\n56 Charge Periods\n57 Charge Periods\n58 Charge Periods\n59 Charge Periods\n60 Charge Periods\n61 Charge Periods\n62 Charge Periods\n63 Charge Periods\n64 Charge Periods\n65 Charge Periods\n66 Charge Periods\n67 Charge Periods\n68 Charge Periods\n69 Charge Periods\n70 Charge Periods\n71 Charge Periods\n72 Charge Periods\n73 Charge Periods\n74 Charge Periods\n75 Charge Periods\n76 Charge Periods\n77 Charge Periods\n78 Charge Periods\n79 Charge Periods\n80 Charge Periods\n81 Charge Periods\n82 Charge Periods\n83 Charge Periods\n84 Charge Periods\n85 Charge Periods\n86 Charge Periods\n87 Charge Periods\n88 Charge Periods\n89 Charge Periods\n90 Charge Periods\n91 Charge Periods\n92 Charge Periods\n93 Charge Periods\n94 Charge Periods\n95 Charge Periods\n96 Charge Periods\n97 Charge Periods\n98 Charge Periods\n99 Charge Periods"
+  },
+  {
+   "fieldname": "billing_start_date",
+   "fieldtype": "Date",
+   "label": "Billing Start Date"
+  },
+  {
+   "fieldname": "billing_end_date",
+   "fieldtype": "Date",
+   "label": "Billing End Date"
+  },
+  {
+   "default": "0",
+   "fieldname": "discount",
+   "fieldtype": "Check",
+   "label": "Discount"
+  },
+  {
+   "fieldname": "discount_value",
+   "fieldtype": "Percent",
+   "label": "Discount Value"
+  },
+  {
+   "fieldname": "discount_start_date",
+   "fieldtype": "Date",
+   "label": "Discount Start Date"
+  },
+  {
+   "fieldname": "discount_end_date",
+   "fieldtype": "Date",
+   "label": "Discount End Date"
+  },
+  {
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "label": "Status",
+   "options": "\nActive\nDisabled\nPaused\nPending\nArchived"
+  },
+  {
+   "fieldname": "location",
+   "fieldtype": "Data",
+   "label": "Location"
+  },
+  {
+   "fieldname": "cli",
+   "fieldtype": "Data",
+   "label": "CLI"
+  },
+  {
+   "fieldname": "static_ip",
+   "fieldtype": "Small Text",
+   "label": "Static IP"
+  },
+  {
+   "fieldname": "pppoe_password",
+   "fieldtype": "Password",
+   "label": "PPPOE Password"
+  },
+  {
+   "default": "0",
+   "fieldname": "ip_look_default_apn",
+   "fieldtype": "Check",
+   "label": "IP LOOK Default APN"
+  },
+  {
+   "fieldname": "realm",
+   "fieldtype": "Data",
+   "label": "Realm"
+  },
+  {
+   "fieldname": "access_device",
+   "fieldtype": "Select",
+   "label": "Access Device",
+   "options": "None"
+  },
+  {
+   "fieldname": "router",
+   "fieldtype": "Select",
+   "label": "Router",
+   "options": "None\nTest Router"
+  },
+  {
+   "fieldname": "service_login",
+   "fieldtype": "Data",
+   "label": "Service Login"
+  },
+  {
+   "fieldname": "service_password",
+   "fieldtype": "Password",
+   "label": "Service Password"
+  },
+  {
+   "fieldname": "ipv4_assignment_method",
+   "fieldtype": "Select",
+   "label": "IPV4 Assignment Method",
+   "options": "None (Router will assign IP)\nPermanent IP (from Static IPs)\nDynamic IP (from IP Pools)"
+  },
+  {
+   "fieldname": "ipv6_network",
+   "fieldtype": "Data",
+   "label": "IPV6 Network"
+  },
+  {
+   "fieldname": "delegated_ipv6_network",
+   "fieldtype": "Data",
+   "label": "Delegated IPV6 Network"
+  },
+  {
+   "fieldname": "macs",
+   "fieldtype": "Data",
+   "label": "MAC(s)"
+  },
+  {
+   "fieldname": "port_id",
+   "fieldtype": "Data",
+   "label": "Port ID"
+  },
+  {
+   "fieldname": "plan_options_section",
+   "fieldtype": "Section Break",
+   "label": "Plan Options"
+  },
+  {
+   "fieldname": "voice_device",
+   "fieldtype": "Select",
+   "label": "Voice Device",
+   "options": "None"
+  },
+  {
+   "fieldname": "direction",
+   "fieldtype": "Select",
+   "label": "Direction",
+   "options": "Outgoing\nIncoming"
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Table",
+   "label": "Phone",
+   "options": "Subscription Service Phone"
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-08-27 18:59:10.775867",
+ "modified_by": "Administrator",
+ "module": "Isp Billing",
+ "name": "Subscription Service",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

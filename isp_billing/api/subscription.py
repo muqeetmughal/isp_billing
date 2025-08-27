@@ -90,6 +90,7 @@ def create_sales_order_from_subscription_plan(subscription_plan_name, customer):
     sales_order = frappe.new_doc("Sales Order")
     sales_order.customer = customer,
     sales_order.delivery_date = "2025-08-27"
+    sales_order.custom_subscription_plan = subscription_plan_name
 
     # Set custom_subscription_plan field
     sales_order.custom_subscription_plan = subscription_plan.name
