@@ -12,7 +12,10 @@
   "section_break_jlsl",
   "stripe_secret_key",
   "column_break_vbpg",
-  "stripe_publish_key"
+  "stripe_publish_key",
+  "gocardless_credentials_section",
+  "access_token",
+  "webhook_secret"
  ],
  "fields": [
   {
@@ -54,13 +57,29 @@
    "fieldname": "admin_email_section",
    "fieldtype": "Section Break",
    "label": "Admin Email"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "gocardless_credentials_section",
+   "fieldtype": "Section Break",
+   "label": "GoCardless Credentials"
+  },
+  {
+   "fieldname": "access_token",
+   "fieldtype": "Data",
+   "label": "Access Token"
+  },
+  {
+   "fieldname": "webhook_secret",
+   "fieldtype": "Data",
+   "label": "Webhook Secret"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-08-22 12:23:25.603901",
+ "modified": "2025-08-27 14:25:12.047832",
  "modified_by": "Administrator",
  "module": "Isp Billing",
  "name": "Isp Billing Setting",

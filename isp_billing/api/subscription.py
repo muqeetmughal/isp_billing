@@ -78,38 +78,34 @@ def get_subscription_plans():
 
 
 
-
-
-
-
 @frappe.whitelist(allow_guest=True)
-def create_quotation_from_subscription_plan(subscription_plan_name, customer):
+def create_sales_order_from_subscription_plan(subscription_plan_name, customer):
     # Fetch subscription plan details
     subscription_plan = frappe.get_doc("Subscription Plan", subscription_plan_name)
 
     if not subscription_plan:
         frappe.throw(f"Subscription Plan {subscription_plan_name} not found")
 
-    # Create quotation document
-    quotation = frappe.new_doc("Quotation")
-    quotation.party_type = "Customer"
-    quotation.party_name = customer
-    quotation.quotation_to = "Customer"
+    # Create sales order document
+    sales_order = frappe.new_doc("Sales Order")
+    sales_order.customer = customer,
+    sales_order.delivery_date = "2025-08-27"
 
     # Set custom_subscription_plan field
-    quotation.custom_subscription_plan = subscription_plan.name
+    sales_order.custom_subscription_plan = subscription_plan.name
 
-    # Add quotation item
-    quotation.append("items", {
+    # Add sales order item
+    sales_order.append("items", {
         "item_code": subscription_plan.item,
         "qty": 1,
-        "rate": subscription_plan.cost
+        "rate": subscription_plan.cost,
+        "warehouse": "Stores - CS"
     })
 
-    quotation.insert(ignore_permissions=True)
-    quotation.submit()  
+    sales_order.insert(ignore_permissions=True)
+    sales_order.submit()
 
-    return quotation.name
+    return sales_order.name
 
 
 

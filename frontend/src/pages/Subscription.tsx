@@ -57,14 +57,14 @@ const Subscription = () => {
     try {
       // fetch customer name from backend by email
       const customerRes = await axios.get(
-        "/api/method/isp_billing.api.subscription.get_customer_name_by_email",
+        "/api/method/isp_billing.api.customer.get_customer_name_by_email",
         { params: { email: currentUser } }
       );
       const customerName = customerRes.data.message;
 
       // call your quotation creation API
       const res = await axios.post(
-        "/api/method/isp_billing.api.subscription.create_quotation_from_subscription_plan",
+        "/api/method/isp_billing.api.subscription.create_sales_order_from_subscription_plan",
         {
           subscription_plan_name: planName,
           customer: customerName,
