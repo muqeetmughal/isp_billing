@@ -378,3 +378,70 @@ def add_plan_in_subscription(party, plan, start_date, end_date, qty):
 
 
 
+
+
+
+
+
+
+
+@frappe.whitelist(allow_guest=True)
+# def get_new_subscription_details(subscriber):
+
+#     Subscription = DocType("CLI Subscription")
+#     Service = DocType("Subscription Service")
+
+#     subscription = (frappe.qb.from_(Subscription)
+#             .inner_join(Service).on(Subscription.name == Service.parent)
+#             .select(
+#                 Subscription.name,
+#                 Service.plan,
+#                 Service.quantity,
+#                 Service.billing_start_date,
+#                 Service.status
+#             )
+#             .where(Subscription.name == subscriber)
+#     ).run(as_dict=True)
+
+#     return subscription
+
+
+def get_new_subscription_details(subscriber):
+    Subscription = DocType("CLI Subscription")
+    Service = DocType("Subscription Service")
+
+    raw_data = (
+        frappe.qb.from_(Subscription)
+        .join(Service).on(Subscription.name == Service.parent)
+        .select(
+            Subscription.name,
+            Service.plan,
+            Service.quantity,
+            Service.billing_start_date,
+            Service.status
+        )
+        .where(Subscription.name == subscriber)
+        .run(as_dict=True)
+    )
+
+    subscriptions = {}
+    for row in raw_data:
+        sub_name = row["name"]
+        if sub_name not in subscriptions:
+            subscriptions[sub_name] = {
+                "name": sub_name,
+                "plans": []
+            }
+
+        subscriptions[sub_name]["plans"].append({
+            "plan": row["plan"],
+            "quantity": row["quantity"],
+            "billing_start_date": row["billing_start_date"],
+            "status": row["status"]
+        })
+
+    return list(subscriptions.values())
+
+
+
+

@@ -19,9 +19,14 @@ const Subscription = () => {
     const fetchSubscriptions = async () => {
       if (!currentUser) return;
       try {
+        const customerRes = await axios.get(
+        "/api/method/isp_billing.api.customer.get_customer_name_by_email",
+        { params: { email: currentUser } }
+      );
+      const customerName = customerRes.data.message;
         const response = await axios.get(
-          "/api/method/isp_billing.api.subscription.get_subscription_details",
-          { params: { email: currentUser } }
+          "/api/method/isp_billing.api.subscription.get_new_subscription_details",
+          { params: { subscriber: customerName } }
         );
         if (response.data.message && response.data.message.length > 0) {
           setSubscriptions(response.data.message);

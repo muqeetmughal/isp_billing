@@ -2,7 +2,9 @@ import os
 import frappe
 import base64
 from docuseal import docuseal
-from frappe.query_builder import DocType
+from frappe.utils.pdf import get_pdf
+from frappe.utils.file_manager import save_file
+
 
 
 
@@ -14,26 +16,7 @@ def get_docu_seal_token():
 
 
 
-@frappe.whitelist(allow_guest=True)
-def get_template():
-    setting = frappe.get_single("Docuseal Setting")
-    template_list = setting.get("docuseal_template_ids", [])
-
-    # Extract only template_id and description
-    filtered_templates = [
-        {
-            "template_id": template.get("template_id"),
-            "description": template.get("description")
-        }
-        for template in template_list
-    ]
-
-    return filtered_templates
-
-
-
-
-
+"""Using the method we can send any document to the customer"""
 @frappe.whitelist(allow_guest=True)
 def send_docuseal_document(template_id, email):
 
@@ -79,7 +62,10 @@ def send_docuseal_document(template_id, email):
 
 def list_submission():
 
-    docuseal.key = "uvhBRFEQcWVTJ1exku5K3UzqPKnQNgcxRsiq4EdUNb9"
+    settings = get_docu_seal_token()
+    token = settings.get("docuseal_api_token")
+
+    docuseal.key = token
     docuseal.url = "https://api.docuseal.com"
 
     data = docuseal.list_submissions({ "limit": 10 })
@@ -189,5 +175,106 @@ def get_template_list():
 
     return templates
 
+
+
+
+
+
+
+
+"""
+This method is used to save sales order print template in file and also create template in the
+docuseal 
+"""
+@frappe.whitelist()
+def attach_sales_order_pdf(docname, print_format=None):
+    """Generate Sales Order PDF with selected print format, attach as File, send to DocuSeal, and store template_id"""
+    doc = frappe.get_doc("Sales Order", docname)
+
+    # Step 1: Render PDF
+    pdf_data = get_pdf(frappe.get_print("Sales Order", doc.name, print_format or "Standard"))
+
+    # Step 2: Save PDF in File doctype
+    filedoc = save_file(
+        f"{doc.name}.pdf",
+        pdf_data,
+        "Sales Order",
+        doc.name,
+        is_private=0   # must be public so we can fetch file via /files/
+    )
+
+    # Step 3: Build template name (Customer Name + Subscription Plan)
+    template_name = f"{doc.customer_name} - {doc.custom_subscription_plan}"
+
+    # Step 4: Send file to DocuSeal
+    template_id = None
+    try:
+        res = create_docuseal_template(filedoc.file_url, template_name)
+        template_id = res.get("data", {}).get("id")   # DocuSeal template ID
+
+        # Step 5: Store template_id in Sales Order (custom field required)
+        if template_id:
+            doc.db_set("custom_docuseal_template_id", template_id)
+            frappe.logger().info(f"DocuSeal Template Created for SO {doc.name}: {template_id}")
+
+    except Exception as e:
+        frappe.log_error(f"DocuSeal Error for Sales Order {doc.name}: {str(e)}")
+
+    return {
+        "file_id": filedoc.name,
+        "docuseal_template_id": template_id
+    }
+
+
+
+
+
+
+
+
+
+
+
+"""
+This is the webhook code that tell us when customer signed the document.
+"""
+@frappe.whitelist(allow_guest=True)  # DocuSeal will call without auth
+def docuseal_webhook():
+    """
+    Webhook endpoint for DocuSeal to update Sales Order on submission completed.
+    """
+    try:
+        data = frappe.request.get_json()  # Proper JSON payload
+        frappe.logger("docuseal").info(f"Webhook received: {data}")
+
+        event_type = data.get("event_type")
+        submission = data.get("data", {})
+
+        # Extract values
+        template_id = None
+        status = None
+
+        if submission:
+            template_id = submission.get("template", {}).get("id")
+            status = submission.get("status")
+
+        if not template_id or not status:
+            return {"status": "error", "message": "Invalid payload"}
+
+        # Only act on submission completed
+        if event_type == "submission.completed" and status.lower() == "completed":
+            # Find Sales Order with this template_id
+            so_name = frappe.get_value("Sales Order", {"custom_docuseal_template_id": str(template_id)}, "name")
+
+            if so_name:
+                frappe.db.set_value("Sales Order", so_name, "custom_e_sign_status", "Completed")
+                frappe.db.commit()
+                return {"status": "success", "message": f"Sales Order {so_name} updated"}
+
+        return {"status": "ignored", "message": f"Event {event_type} with status {status}"}
+
+    except Exception as e:
+        frappe.log_error(f"DocuSeal Webhook Error: {str(e)}")
+        return {"status": "error", "message": str(e)}
 
 
