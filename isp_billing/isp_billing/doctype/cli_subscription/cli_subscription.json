@@ -1,44 +1,37 @@
 {
  "actions": [],
  "allow_rename": 1,
- "creation": "2025-08-27 19:50:42.473091",
+ "autoname": "field:customer",
+ "creation": "2025-08-28 13:16:08.379562",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
-  "customer_id",
-  "email",
-  "given_name",
-  "family_name"
+  "customer",
+  "service"
  ],
  "fields": [
   {
-   "fieldname": "email",
-   "fieldtype": "Data",
-   "label": "Email"
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "Customer",
+   "unique": 1
   },
   {
-   "fieldname": "given_name",
-   "fieldtype": "Data",
-   "label": "Given Name"
-  },
-  {
-   "fieldname": "family_name",
-   "fieldtype": "Data",
-   "label": "Family Name"
-  },
-  {
-   "fieldname": "customer_id",
-   "fieldtype": "Data",
-   "label": "Customer ID"
+   "fieldname": "service",
+   "fieldtype": "Table",
+   "label": "Service",
+   "options": "Subscription Service"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-08-28 13:15:35.565028",
+ "modified": "2025-08-28 13:45:59.570978",
  "modified_by": "Administrator",
  "module": "Isp Billing",
- "name": "GoCardless Customer",
+ "name": "CLI Subscription",
+ "naming_rule": "By fieldname",
  "owner": "Administrator",
  "permissions": [
   {

@@ -12,7 +12,7 @@
  "apply_document_permissions": 0,
  "button_label": "Save",
  "condition_json": "[]",
- "creation": "2025-08-20 16:58:31.978382",
+ "creation": "2025-08-27 11:53:13.197362",
  "doc_type": "Lead",
  "docstatus": 0,
  "doctype": "Web Form",
@@ -21,7 +21,7 @@
  "list_columns": [],
  "login_required": 0,
  "max_attachment_size": 0,
- "modified": "2025-08-21 18:26:16.272103",
+ "modified": "2025-08-28 12:24:34.345486",
  "modified_by": "Administrator",
  "module": "Isp Billing",
  "name": "lead-form",
@@ -57,7 +57,7 @@
    "max_value": 0,
    "precision": "",
    "read_only": 0,
-   "reqd": 0,
+   "reqd": 1,
    "show_in_filter": 0
   },
   {

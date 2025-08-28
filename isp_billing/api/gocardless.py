@@ -1,4 +1,7 @@
+import hmac
+import json
 import frappe
+import hashlib
 import gocardless_pro
 
 
@@ -7,20 +10,6 @@ import gocardless_pro
 def get_gocardless_access_token():
     access_token = frappe.get_single("Isp Billing Setting")
     return access_token
-
-
-
-
-def gocardless_first():
-    access_token = get_gocardless_access_token()
-    token = access_token.get("access_token")
-    client = gocardless_pro.Client(
-        access_token= token,
-        environment='sandbox'
-    )
-
-    return client
-
 
 
 
@@ -61,47 +50,6 @@ def gocardless_test():
     }
 
 
-
-
-
-
-#Create customer in GoCardless
-def create_customer(first_name, last_name, email, address, city, postal_code, country_code):
-
-    access_token = get_gocardless_access_token()
-    token = access_token.get("access_token")
-
-    # Initialize the GoCardless client
-    client = gocardless_pro.Client(
-        access_token=token,
-        environment="sandbox" 
-    )
-
-    # Define customer parameters
-    customer_params = {
-        "given_name": "John",
-        "family_name": "Doe",
-        "email": "john.doe@example.com",
-        "address_line1": "123 Main Street",
-        "city": "London",
-        "postal_code": "SW1A 0AA",
-        "country_code": "GB",
-        # Add other relevant fields as needed, e.g., company_name, phone_number
-    }
-
-    try:
-        # Create the customer
-        customer = client.customers.create(params=customer_params)
-        print(f"Customer created successfully: {customer.id}")
-        print(f"Customer details: {customer}")
-    except gocardless_pro.errors.GoCardlessProError as e:
-        print(f"Error creating customer: {e}")
-
-
-    return {
-        "success": True,
-        "msg": "Customer created successfully"
-    }
 
 
 
@@ -224,6 +172,48 @@ def create_subscription(mandate_id: str):
 
 
 
+def get_subscriptions_by_mandate(mandate_id: str):
+    """Fetch all subscriptions linked to a mandate"""
+    try:
+        access_token = get_gocardless_access_token()
+        token = access_token.get("access_token")
+
+        # Initialize GoCardless client
+        client = gocardless_pro.Client(
+            access_token=token,
+            environment="sandbox"  # change to 'live' in production
+        )
+
+        # List subscriptions filtered by mandate
+        subscriptions = client.subscriptions.list(params={
+            "mandate": mandate_id
+        }).records
+
+        result = []
+        for sub in subscriptions:
+            result.append({
+                "subscription_id": sub.id,
+                "name": sub.name,
+                "amount": sub.amount,
+                "currency": sub.currency,
+                "status": sub.status,
+                "interval_unit": sub.interval_unit,
+                "created_at": sub.created_at,
+                "start_date": sub.start_date,
+                "end_date": sub.end_date,
+                "mandate_id": sub.links.mandate
+            })
+
+        return {
+            "success": True,
+            "count": len(result),
+            "subscriptions": result
+        }
+
+    except gocardless_pro.errors.GoCardlessProError as e:
+        frappe.log_error(f"GoCardless Error: {str(e)}", "GoCardless Subscription Fetch Error")
+        return {"success": False, "msg": str(e)}
+
 
 
 
@@ -289,15 +279,6 @@ def complete_redirect_flow(redirect_flow_id, session_token):
 
 
 
-
-import frappe
-import hmac
-import hashlib
-import json
-import gocardless_pro
-
-# GoCardless webhook secret (set in your GoCardless dashboard)
-WEBHOOK_SECRET = "NZ2hC5AesymiNz-yYvKImTcTHkzOCFdX5pdoduUL"
 
 @frappe.whitelist(allow_guest=True)
 def gocardless_webhook():
@@ -374,6 +355,14 @@ def verify_webhook_signature(payload, signature):
     """
     Verify GoCardless webhook signature
     """
+
+    access_token = get_gocardless_access_token()
+    token = access_token.get("webhook_secret")    
+
+
+# GoCardless webhook secret (set in your GoCardless dashboard)
+    WEBHOOK_SECRET = token
+
     computed_signature = hmac.new(
         WEBHOOK_SECRET.encode("utf-8"),
         payload.encode("utf-8"),
@@ -410,7 +399,7 @@ def get_customer_from_mandate(mandate_id):
         # Initialize client
         client = gocardless_pro.Client(
             access_token=token,
-            environment="sandbox"  # change to "live" in production
+            environment="sandbox"
         )
 
         # Step 1: Get Mandate details
@@ -431,3 +420,153 @@ def get_customer_from_mandate(mandate_id):
     except Exception as e:
         frappe.log_error(message=str(e), title="GoCardless Fetch Customer Error")
         return None
+
+
+
+
+"""
+if new customer is created in the gocardles and same customer is exists in the customer doctype with
+same email then it will add mandate id in the customer document.
+ """
+def process_new_mandate(doc, method):
+    """
+    Runs when a new GoCardless Mandates doc is added
+    """
+    mandate_id = doc.mandate_id
+    if not mandate_id:
+        return
+
+    # Step 1: Fetch customer details from GoCardless
+    details = get_customer_from_mandate(mandate_id)
+    if not details:
+        return
+
+    email = details.get("email")
+    if not email:
+        return 
+
+    # Step 2: Find Customer with this email
+    customer = frappe.get_value("Customer", {"custom_email": email}, "name")
+
+    if customer:
+        # Step 3: Update Customer with mandate id
+        frappe.db.set_value("Customer", customer, "custom_gocardless_mandate_id", details.get("mandate_id"))
+        frappe.db.commit()
+
+    if not customer:
+        return "No Customer exists with this email"
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""
+when new plan is added in the subscription if its status is active then it will add this in the 
+gocardless mandate otherwise do nothing 
+"""
+# def handle_cli_subscription(doc, method):
+#     """Handle CLI Subscription logic on save"""
+
+#     # Get mandate_id from linked Customer
+#     mandate_id = frappe.db.get_value("Customer", doc.customer, "custom_gocardless_mandate_id")
+#     if not mandate_id:
+#         frappe.throw("Customer does not have a GoCardless mandate ID")
+
+#     # Connect to GoCardless
+
+#     access_token = get_gocardless_access_token()
+#     token = access_token.get("access_token")
+
+#     access_token = token
+#     client = gocardless_pro.Client(access_token=access_token, environment="sandbox")
+
+#     # Fetch active subscriptions for the mandate
+#     existing_subs = client.subscriptions.list(params={"mandate": mandate_id})
+#     active_plans = {
+#         sub.metadata.get("plan"): sub.status
+#         for sub in existing_subs.records
+#         if sub.status == "active"
+#     }
+
+#     # Iterate over services in the child table
+#     for service in doc.service:
+#         plan = service.plan
+#         # If plan already active in GoCardless → skip
+#         if plan in active_plans:
+#             continue
+
+#         # Otherwise → create a new subscription for this plan
+#         subscription_params = {
+#             "amount": int(service.price * 100),  # in pence
+#             "currency": "GBP",
+#             "name": plan,
+#             "interval_unit": "monthly",  # or dynamic from service
+#             "links": {"mandate": mandate_id},
+#             "metadata": {"plan": plan},
+#         }
+
+#         new_sub = client.subscriptions.create(params=subscription_params)
+#         frappe.msgprint(f"Created new subscription {new_sub.id} for plan {plan}")
+
+
+def handle_cli_subscription(doc, method):
+    """Handle CLI Subscription logic on save"""
+
+    # Get mandate_id from linked Customer
+    mandate_id = frappe.db.get_value("Customer", doc.customer, "custom_gocardless_mandate_id")
+    if not mandate_id:
+        frappe.throw("Customer does not have a GoCardless mandate ID")
+
+    # Connect to GoCardless
+
+    access_token = get_gocardless_access_token()
+    token = access_token.get("access_token")
+
+    access_token = token
+    client = gocardless_pro.Client(access_token=access_token, environment="sandbox")
+
+    # Fetch active subscriptions for the mandate
+    existing_subs = client.subscriptions.list(params={"mandate": mandate_id})
+    active_plans = {
+        sub.metadata.get("plan"): sub.status
+        for sub in existing_subs.records
+        if sub.status == "active"
+    }
+
+    # Iterate over services in the child table
+    for service in doc.service:
+        plan = service.plan.strip() if service.plan else None
+        status = (service.status or "").lower()
+
+        # ✅ Condition 1: must be "active"
+        if status != "active":
+            frappe.msgprint(f"Skipping {plan} (not Active)")
+            continue
+
+        # ✅ Condition 2: must not already exist in GoCardless active subs
+        if plan in active_plans:
+            frappe.msgprint(f"Skipping {plan} (already subscribed in GoCardless)")
+            continue
+
+        # Otherwise → create a new subscription
+        subscription_params = {
+            "amount": int(service.price * 100),  # pence
+            "currency": "GBP",
+            "name": plan,
+            "interval_unit": "monthly",  # could be dynamic
+            "links": {"mandate": mandate_id},
+            "metadata": {"plan": plan},
+        }
+
+        new_sub = client.subscriptions.create(params=subscription_params)
+        frappe.msgprint(f"✅ Created new subscription {new_sub.id} for plan {plan}")
+
+

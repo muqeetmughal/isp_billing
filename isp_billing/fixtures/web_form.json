@@ -1230,7 +1230,7 @@
   "meta_description": null,
   "meta_image": null,
   "meta_title": null,
-  "modified": "2025-08-21 18:26:16.272103",
+  "modified": "2025-08-28 12:24:34.345486",
   "module": "Isp Billing",
   "name": "lead-form",
   "payment_button_help": null,
@@ -1288,7 +1288,7 @@
     "precision": "",
     "read_only": 0,
     "read_only_depends_on": null,
-    "reqd": 0,
+    "reqd": 1,
     "show_in_filter": 0
    },
    {

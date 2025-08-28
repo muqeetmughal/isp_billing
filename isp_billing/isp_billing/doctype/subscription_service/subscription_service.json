@@ -36,15 +36,16 @@
   "port_id",
   "plan_options_section",
   "voice_device",
-  "direction",
-  "phone"
+  "direction"
  ],
  "fields": [
   {
    "fieldname": "plan",
    "fieldtype": "Link",
+   "in_list_view": 1,
    "label": "Plan",
-   "options": "Subscription Plan"
+   "options": "Subscription Plan",
+   "reqd": 1
   },
   {
    "fieldname": "description",
@@ -52,9 +53,12 @@
    "label": "Description"
   },
   {
+   "default": "1",
    "fieldname": "quantity",
    "fieldtype": "Int",
-   "label": "Quantity"
+   "in_list_view": 1,
+   "label": "Quantity",
+   "reqd": 1
   },
   {
    "fieldname": "unit",
@@ -69,13 +73,17 @@
   {
    "fieldname": "pay_period",
    "fieldtype": "Select",
+   "in_list_view": 1,
    "label": "Pay Period",
-   "options": "Default\nPost Paid\n1 Charge period\n2 Charge Periods\n3 Charge Periods\n4 Charge Periods\n5 Charge Periods\n6 Charge Periods\n7 Charge Periods\n8 Charge Periods\n9 Charge Periods\n10 Charge Periods\n11 Charge Periods\n12 Charge Periods\n13 Charge Periods\n14 Charge Periods\n15 Charge Periods\n16 Charge Periods\n17 Charge Periods\n18 Charge Periods\n19 Charge Periods\n20 Charge Periods\n21 Charge Periods\n22 Charge Periods\n23 Charge Periods\n24 Charge Periods\n25 Charge Periods\n26 Charge Periods\n27 Charge Periods\n28 Charge Periods\n29 Charge Periods\n30 Charge Periods\n31 Charge Periods\n32 Charge Periods\n33 Charge Periods\n34 Charge Periods\n35 Charge Periods\n36 Charge Periods\n37 Charge Periods\n38 Charge Periods\n39 Charge Periods\n40 Charge Periods\n41 Charge Periods\n42 Charge Periods\n43 Charge Periods\n44 Charge Periods\n45 Charge Periods\n46 Charge Periods\n47 Charge Periods\n48 Charge Periods\n49 Charge Periods\n50 Charge Periods\n51 Charge Periods\n52 Charge Periods\n53 Charge Periods\n54 Charge Periods\n55 Charge Periods\n56 Charge Periods\n57 Charge Periods\n58 Charge Periods\n59 Charge Periods\n60 Charge Periods\n61 Charge Periods\n62 Charge Periods\n63 Charge Periods\n64 Charge Periods\n65 Charge Periods\n66 Charge Periods\n67 Charge Periods\n68 Charge Periods\n69 Charge Periods\n70 Charge Periods\n71 Charge Periods\n72 Charge Periods\n73 Charge Periods\n74 Charge Periods\n75 Charge Periods\n76 Charge Periods\n77 Charge Periods\n78 Charge Periods\n79 Charge Periods\n80 Charge Periods\n81 Charge Periods\n82 Charge Periods\n83 Charge Periods\n84 Charge Periods\n85 Charge Periods\n86 Charge Periods\n87 Charge Periods\n88 Charge Periods\n89 Charge Periods\n90 Charge Periods\n91 Charge Periods\n92 Charge Periods\n93 Charge Periods\n94 Charge Periods\n95 Charge Periods\n96 Charge Periods\n97 Charge Periods\n98 Charge Periods\n99 Charge Periods"
+   "options": "Default\nPost Paid\n1 Charge period\n2 Charge Periods\n3 Charge Periods\n4 Charge Periods\n5 Charge Periods\n6 Charge Periods\n7 Charge Periods\n8 Charge Periods\n9 Charge Periods\n10 Charge Periods\n11 Charge Periods\n12 Charge Periods\n13 Charge Periods\n14 Charge Periods\n15 Charge Periods\n16 Charge Periods\n17 Charge Periods\n18 Charge Periods\n19 Charge Periods\n20 Charge Periods\n21 Charge Periods\n22 Charge Periods\n23 Charge Periods\n24 Charge Periods\n25 Charge Periods\n26 Charge Periods\n27 Charge Periods\n28 Charge Periods\n29 Charge Periods\n30 Charge Periods\n31 Charge Periods\n32 Charge Periods\n33 Charge Periods\n34 Charge Periods\n35 Charge Periods\n36 Charge Periods\n37 Charge Periods\n38 Charge Periods\n39 Charge Periods\n40 Charge Periods\n41 Charge Periods\n42 Charge Periods\n43 Charge Periods\n44 Charge Periods\n45 Charge Periods\n46 Charge Periods\n47 Charge Periods\n48 Charge Periods\n49 Charge Periods\n50 Charge Periods\n51 Charge Periods\n52 Charge Periods\n53 Charge Periods\n54 Charge Periods\n55 Charge Periods\n56 Charge Periods\n57 Charge Periods\n58 Charge Periods\n59 Charge Periods\n60 Charge Periods\n61 Charge Periods\n62 Charge Periods\n63 Charge Periods\n64 Charge Periods\n65 Charge Periods\n66 Charge Periods\n67 Charge Periods\n68 Charge Periods\n69 Charge Periods\n70 Charge Periods\n71 Charge Periods\n72 Charge Periods\n73 Charge Periods\n74 Charge Periods\n75 Charge Periods\n76 Charge Periods\n77 Charge Periods\n78 Charge Periods\n79 Charge Periods\n80 Charge Periods\n81 Charge Periods\n82 Charge Periods\n83 Charge Periods\n84 Charge Periods\n85 Charge Periods\n86 Charge Periods\n87 Charge Periods\n88 Charge Periods\n89 Charge Periods\n90 Charge Periods\n91 Charge Periods\n92 Charge Periods\n93 Charge Periods\n94 Charge Periods\n95 Charge Periods\n96 Charge Periods\n97 Charge Periods\n98 Charge Periods\n99 Charge Periods",
+   "reqd": 1
   },
   {
    "fieldname": "billing_start_date",
    "fieldtype": "Date",
-   "label": "Billing Start Date"
+   "in_list_view": 1,
+   "label": "Billing Start Date",
+   "reqd": 1
   },
   {
    "fieldname": "billing_end_date",
@@ -107,7 +115,8 @@
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
-   "options": "\nActive\nDisabled\nPaused\nPending\nArchived"
+   "options": "\nActive\nDisabled\nPaused\nPending\nArchived",
+   "reqd": 1
   },
   {
    "fieldname": "location",
@@ -204,19 +213,13 @@
    "fieldtype": "Select",
    "label": "Direction",
    "options": "Outgoing\nIncoming"
-  },
-  {
-   "fieldname": "phone",
-   "fieldtype": "Table",
-   "label": "Phone",
-   "options": "Subscription Service Phone"
   }
  ],
- "grid_page_length": 50,
+ "grid_page_length": 100,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-08-27 18:59:10.775867",
+ "modified": "2025-08-28 13:37:53.923312",
  "modified_by": "Administrator",
  "module": "Isp Billing",
  "name": "Subscription Service",

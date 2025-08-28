@@ -181,6 +181,12 @@ doc_events = {
     },
     "Issue": {
         "after_insert": "isp_billing.api.issue.send_sla_on_issue_create"
+    },
+    "GoCardless Mandates": {
+        "after_insert": "isp_billing.api.gocardless.process_new_mandate"
+    },
+    "CLI Subscription": {
+        "before_save": "isp_billing.api.gocardless.handle_cli_subscription"
     }
 
 }
