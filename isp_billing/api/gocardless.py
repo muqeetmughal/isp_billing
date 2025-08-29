@@ -537,19 +537,6 @@ def handle_cli_subscription(doc, method):
 
 
 
-def cli_subscription_list():
-    CLI_Subscription = DocType("CLI Subscription")
-
-    query = (
-        frappe.qb.from_(CLI_Subscription)
-        .select(
-            CLI_Subscription.name
-        )
-    ).run(as_dict=True)
-
-    return query
-
-
 
 
 
@@ -618,38 +605,80 @@ Create one off paymet in the gocardless
 """
 
 @frappe.whitelist()
-def create_one_off_payment(invoice_name):
+# def create_one_off_payment(invoice_name):
+#     """Create a one-off payment in GoCardless for a given Sales Invoice"""
+
+#     # Fetch Sales Invoice
+#     si = frappe.get_doc("Sales Invoice", invoice_name)
+
+#     if not si.customer:
+#         frappe.throw("Customer is required in Sales Invoice")
+
+#     # Get mandate from customer
+#     customer_doc = frappe.get_doc("Customer", si.customer)
+#     mandate_id = customer_doc.custom_gocardless_mandate_id
+#     if not mandate_id:
+#         frappe.throw(f"No GoCardless Mandate ID found for customer {si.customer}")
+
+#     # Get GoCardless access token
+#     access_token = get_gocardless_access_token()
+#     token = access_token.get("access_token")
+
+#     # Init client
+#     client = gocardless_pro.Client(
+#         access_token=token,
+#         environment="sandbox"  # 🔹 change to 'live' in production
+#     )
+
+#     try:
+#         # Create payment
+#         payment = client.payments.create(params={
+#             "amount": int(si.grand_total * 100),   # pence/cents, no decimals
+#             "currency": si.currency or "GBP",      # fallback to GBP
+#             "links": {
+#                 "mandate": mandate_id              # 🔹 must link to mandate
+#             },
+#             "metadata": {
+#                 "erpnext_invoice": si.name,
+#                 "customer": si.customer
+#             }
+#         })
+
+#         frappe.msgprint(f"GoCardless One-Off Payment created: {payment.id}")
+#         return {"success": True, "payment_id": payment.id}
+
+#     except Exception as e:
+#         frappe.log_error(frappe.get_traceback(), "GoCardless One-Off Payment Error")
+#         frappe.throw(f"GoCardless Payment Error: {str(e)}")
+
+
+def create_one_off_payment(doc, method=None):
     """Create a one-off payment in GoCardless for a given Sales Invoice"""
 
-    # Fetch Sales Invoice
-    si = frappe.get_doc("Sales Invoice", invoice_name)
+    si = doc  # you already have the Sales Invoice doc from the trigger
 
     if not si.customer:
         frappe.throw("Customer is required in Sales Invoice")
 
-    # Get mandate from customer
     customer_doc = frappe.get_doc("Customer", si.customer)
     mandate_id = customer_doc.custom_gocardless_mandate_id
     if not mandate_id:
         frappe.throw(f"No GoCardless Mandate ID found for customer {si.customer}")
 
-    # Get GoCardless access token
     access_token = get_gocardless_access_token()
     token = access_token.get("access_token")
 
-    # Init client
     client = gocardless_pro.Client(
         access_token=token,
-        environment="sandbox"  # 🔹 change to 'live' in production
+        environment="sandbox"
     )
 
     try:
-        # Create payment
         payment = client.payments.create(params={
-            "amount": int(si.grand_total * 100),   # pence/cents, no decimals
-            "currency": si.currency or "GBP",      # fallback to GBP
+            "amount": int(si.grand_total * 100),
+            "currency": si.currency or "GBP",
             "links": {
-                "mandate": mandate_id              # 🔹 must link to mandate
+                "mandate": mandate_id
             },
             "metadata": {
                 "erpnext_invoice": si.name,
@@ -663,8 +692,6 @@ def create_one_off_payment(invoice_name):
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "GoCardless One-Off Payment Error")
         frappe.throw(f"GoCardless Payment Error: {str(e)}")
-
-
 
 
 

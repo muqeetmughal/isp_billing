@@ -185,6 +185,9 @@ doc_events = {
     "GoCardless Mandates": {
         "after_insert": "isp_billing.api.gocardless.process_new_mandate"
     },
+    "Sales Invoice": {
+        "on_submit": "isp_billing.api.sales_invoice.create_one_off_payment"
+    }
     # "CLI Subscription": {
     #     "before_save": "isp_billing.api.gocardless.handle_cli_subscription"
     # }
