@@ -43,10 +43,15 @@ def gocardless_test():
 
     print("Mandate ID", [man.id for man in mandates])
     print("Status", [man.status for man in mandates])
+
+
+    subscription = client.subscriptions.list().records
+
+    print("Subscription IDs", [sub.id for sub in subscription])
     
     return {
         "message": "GoCardless client created successfully",
-        "environment": client._environment_url
+        # "environment": client._environment_url
     }
 
 
@@ -467,55 +472,10 @@ def process_new_mandate(doc, method):
 
 
 
-
 """
 when new plan is added in the subscription if its status is active then it will add this in the 
 gocardless mandate otherwise do nothing 
 """
-# def handle_cli_subscription(doc, method):
-#     """Handle CLI Subscription logic on save"""
-
-#     # Get mandate_id from linked Customer
-#     mandate_id = frappe.db.get_value("Customer", doc.customer, "custom_gocardless_mandate_id")
-#     if not mandate_id:
-#         frappe.throw("Customer does not have a GoCardless mandate ID")
-
-#     # Connect to GoCardless
-
-#     access_token = get_gocardless_access_token()
-#     token = access_token.get("access_token")
-
-#     access_token = token
-#     client = gocardless_pro.Client(access_token=access_token, environment="sandbox")
-
-#     # Fetch active subscriptions for the mandate
-#     existing_subs = client.subscriptions.list(params={"mandate": mandate_id})
-#     active_plans = {
-#         sub.metadata.get("plan"): sub.status
-#         for sub in existing_subs.records
-#         if sub.status == "active"
-#     }
-
-#     # Iterate over services in the child table
-#     for service in doc.service:
-#         plan = service.plan
-#         # If plan already active in GoCardless → skip
-#         if plan in active_plans:
-#             continue
-
-#         # Otherwise → create a new subscription for this plan
-#         subscription_params = {
-#             "amount": int(service.price * 100),  # in pence
-#             "currency": "GBP",
-#             "name": plan,
-#             "interval_unit": "monthly",  # or dynamic from service
-#             "links": {"mandate": mandate_id},
-#             "metadata": {"plan": plan},
-#         }
-
-#         new_sub = client.subscriptions.create(params=subscription_params)
-#         frappe.msgprint(f"Created new subscription {new_sub.id} for plan {plan}")
-
 
 def handle_cli_subscription(doc, method):
     """Handle CLI Subscription logic on save"""
@@ -545,6 +505,8 @@ def handle_cli_subscription(doc, method):
     for service in doc.service:
         plan = service.plan.strip() if service.plan else None
         status = (service.status or "").lower()
+        start_date = service.billing_start_date
+        month = service.no_of_month
 
         # ✅ Condition 1: must be "active"
         if status != "active":
@@ -564,9 +526,171 @@ def handle_cli_subscription(doc, method):
             "interval_unit": "monthly",  # could be dynamic
             "links": {"mandate": mandate_id},
             "metadata": {"plan": plan},
+            "count": month,
+            "start_date": start_date
         }
 
         new_sub = client.subscriptions.create(params=subscription_params)
         frappe.msgprint(f"✅ Created new subscription {new_sub.id} for plan {plan}")
+
+
+
+
+
+
+
+
+
+@frappe.whitelist()
+def create_invoices_for_subscription(subscription):
+
+    access_token = get_gocardless_access_token()
+    token = access_token.get("access_token")
+
+    sub_doc = frappe.get_doc("CLI Subscription", subscription)
+
+    if not sub_doc.customer:
+        return("Customer is required in CLI Subscription")
+    print(sub_doc.customer)
+
+    # get customer doc to fetch mandate id
+    customer_doc = frappe.get_doc("Customer", sub_doc.customer)
+    mandate_id = customer_doc.custom_gocardless_mandate_id
+
+    services = sub_doc.get("service") or []  
+
+    created_invoices = []
+
+    for svc in services:
+        if svc.status != "Active":
+            continue
+
+        # Fetch Subscription Plan to get item
+        plan = frappe.get_doc("Subscription Plan", svc.plan)
+        if not plan.item:
+            return(f"No Item linked in Subscription Plan {svc.plan}")
+
+        # Create Sales Invoice for this plan
+        si = frappe.new_doc("Sales Invoice")
+        si.customer = sub_doc.customer
+        si.due_date = frappe.utils.nowdate()
+
+        si.append("items", {
+            "item_code": plan.item,
+            "qty": svc.quantity,
+            "rate": svc.price
+        })
+
+        si.insert(ignore_permissions=True)
+        si.submit()
+        created_invoices.append((si.name, plan.plan_name or plan.name))
+
+        # 🔹 NEW PART → check GoCardless subscription & create payment
+        if mandate_id:
+            gc_subs = get_subscriptions_by_mandate(mandate_id)
+            if gc_subs.get("success") and gc_subs.get("subscriptions"):
+                for gc_sub in gc_subs["subscriptions"]:
+                    local_plan_name = (plan.plan_name or plan.name).lower().strip()
+                    gc_plan_name = gc_sub["name"].lower().strip()
+
+                    frappe.logger().info(f"Comparing GC:{gc_plan_name} vs Local:{local_plan_name}")
+
+                    if gc_plan_name == local_plan_name:
+                        try:
+                            client = gocardless_pro.Client(
+                                access_token=token,
+                                environment="sandbox"
+                            )
+
+                            client.payments.create(params={
+                                "amount": int(si.grand_total * 100),
+                                "currency": gc_sub["currency"],   # safer than hardcoding GBP
+                                # "links": {"subscription": gc_sub["subscription_id"]},
+                                "links": {
+                                    "mandate": mandate_id,
+                                    "subscription": gc_sub["subscription_id"]
+                            },
+                                "metadata": {"invoice": si.name}
+                            })
+
+                            frappe.logger().info(
+                                f"GoCardless payment created for invoice {si.name}, plan {plan.name}"
+                            )
+
+                        except Exception as e:
+                            frappe.log_error(f"GoCardless Error: {str(e)}", "GoCardless Payment Error")
+                            frappe.throw(f"GoCardless Payment Error: {str(e)}")
+
+    return {"success": True, "created_invoices": created_invoices}
+
+
+
+
+
+
+
+
+
+"""
+Create one off paymet in the gocardless
+"""
+
+@frappe.whitelist()
+def create_one_off_payment(invoice_name):
+    """Create a one-off payment in GoCardless for a given Sales Invoice"""
+
+    # Fetch Sales Invoice
+    si = frappe.get_doc("Sales Invoice", invoice_name)
+
+    if not si.customer:
+        frappe.throw("Customer is required in Sales Invoice")
+
+    # Get mandate from customer
+    customer_doc = frappe.get_doc("Customer", si.customer)
+    mandate_id = customer_doc.custom_gocardless_mandate_id
+    if not mandate_id:
+        frappe.throw(f"No GoCardless Mandate ID found for customer {si.customer}")
+
+    # Get GoCardless access token
+    access_token = get_gocardless_access_token()
+    token = access_token.get("access_token")
+
+    # Init client
+    client = gocardless_pro.Client(
+        access_token=token,
+        environment="sandbox"  # 🔹 change to 'live' in production
+    )
+
+    try:
+        # Create payment
+        payment = client.payments.create(params={
+            "amount": int(si.grand_total * 100),   # pence/cents, no decimals
+            "currency": si.currency or "GBP",      # fallback to GBP
+            "links": {
+                "mandate": mandate_id              # 🔹 must link to mandate
+            },
+            "metadata": {
+                "erpnext_invoice": si.name,
+                "customer": si.customer
+            }
+        })
+
+        frappe.msgprint(f"GoCardless One-Off Payment created: {payment.id}")
+        return {"success": True, "payment_id": payment.id}
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "GoCardless One-Off Payment Error")
+        frappe.throw(f"GoCardless Payment Error: {str(e)}")
+
+
+
+
+
+
+
+
+
+
+
 
 

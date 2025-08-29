@@ -9,31 +9,41 @@
   "plan",
   "description",
   "quantity",
+  "no_of_month",
   "unit",
   "price",
   "pay_period",
   "billing_start_date",
   "billing_end_date",
-  "discount",
-  "discount_value",
-  "discount_start_date",
-  "discount_end_date",
   "status",
-  "location",
   "cli",
+  "location",
   "static_ip",
   "pppoe_password",
   "ip_look_default_apn",
   "realm",
-  "access_device",
   "router",
+  "access_device",
   "service_login",
   "service_password",
-  "ipv4_assignment_method",
   "ipv6_network",
+  "ipv4_assignment_method",
   "delegated_ipv6_network",
   "macs",
   "port_id",
+  "discount_section",
+  "discount",
+  "discount_value",
+  "discount_start_date",
+  "discount_end_date",
+  "one_time_service_section",
+  "additional_one_time_service",
+  "one_time_plan",
+  "recurring_service_section",
+  "pax8_updated_date",
+  "pax8_subscription_id",
+  "pax8_product_id",
+  "pax8_invoice_item_id",
   "plan_options_section",
   "voice_device",
   "direction"
@@ -150,10 +160,10 @@
    "label": "Realm"
   },
   {
+   "default": "None",
    "fieldname": "access_device",
-   "fieldtype": "Select",
-   "label": "Access Device",
-   "options": "None"
+   "fieldtype": "Data",
+   "label": "Access Device"
   },
   {
    "fieldname": "router",
@@ -198,28 +208,87 @@
    "label": "Port ID"
   },
   {
+   "collapsible": 1,
    "fieldname": "plan_options_section",
    "fieldtype": "Section Break",
-   "label": "Plan Options"
+   "label": "Voice Service"
   },
   {
+   "default": "None",
    "fieldname": "voice_device",
-   "fieldtype": "Select",
-   "label": "Voice Device",
-   "options": "None"
+   "fieldtype": "Data",
+   "label": "Voice Device"
   },
   {
    "fieldname": "direction",
    "fieldtype": "Select",
    "label": "Direction",
    "options": "Outgoing\nIncoming"
+  },
+  {
+   "fieldname": "pax8_updated_date",
+   "fieldtype": "Data",
+   "label": "Pax8 Updated Date"
+  },
+  {
+   "fieldname": "pax8_subscription_id",
+   "fieldtype": "Data",
+   "label": "Pax8 Subscription ID"
+  },
+  {
+   "fieldname": "pax8_product_id",
+   "fieldtype": "Data",
+   "label": "Pax8 Product ID"
+  },
+  {
+   "fieldname": "pax8_invoice_item_id",
+   "fieldtype": "Data",
+   "label": "Pax8 Invoice Item ID"
+  },
+  {
+   "default": "0",
+   "fieldname": "additional_one_time_service",
+   "fieldtype": "Check",
+   "label": "Additional One Time Service"
+  },
+  {
+   "fieldname": "one_time_plan",
+   "fieldtype": "Link",
+   "label": "One Time Plan",
+   "options": "Subscription Plan"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "discount_section",
+   "fieldtype": "Section Break",
+   "label": "Discount"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "one_time_service_section",
+   "fieldtype": "Section Break",
+   "label": "One Time Service"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "recurring_service_section",
+   "fieldtype": "Section Break",
+   "label": "Recurring Service"
+  },
+  {
+   "default": "1",
+   "fieldname": "no_of_month",
+   "fieldtype": "Int",
+   "label": "No of Month",
+   "non_negative": 1,
+   "reqd": 1
   }
  ],
  "grid_page_length": 100,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-08-28 13:37:53.923312",
+ "modified": "2025-08-29 14:45:57.442413",
  "modified_by": "Administrator",
  "module": "Isp Billing",
  "name": "Subscription Service",

@@ -415,10 +415,13 @@ def get_new_subscription_details(subscriber):
         .join(Service).on(Subscription.name == Service.parent)
         .select(
             Subscription.name,
+            Subscription.customer,
             Service.plan,
             Service.quantity,
             Service.billing_start_date,
-            Service.status
+            Service.status,
+            Service.price
+
         )
         .where(Subscription.name == subscriber)
         .run(as_dict=True)
@@ -427,9 +430,11 @@ def get_new_subscription_details(subscriber):
     subscriptions = {}
     for row in raw_data:
         sub_name = row["name"]
+        customer = row["customer"]
         if sub_name not in subscriptions:
             subscriptions[sub_name] = {
                 "name": sub_name,
+                "customer": customer,
                 "plans": []
             }
 
@@ -437,10 +442,53 @@ def get_new_subscription_details(subscriber):
             "plan": row["plan"],
             "quantity": row["quantity"],
             "billing_start_date": row["billing_start_date"],
-            "status": row["status"]
+            "status": row["status"],
+            "price": row["price"]
         })
 
     return list(subscriptions.values())
+
+
+
+
+
+
+# @frappe.whitelist()
+# def create_invoices_for_subscription(subscription):
+#     sub_doc = frappe.get_doc("CLI Subscription", subscription)
+
+#     if not sub_doc.customer:
+#         frappe.throw("Customer is required in CLI Subscription")
+
+#     # replace with your actual child table fieldname
+#     services = sub_doc.get("service") or []  
+
+#     for svc in services:
+#         if svc.status != "Active":
+#             continue
+
+#         # Fetch Subscription Plan to get item
+#         plan = frappe.get_doc("Subscription Plan", svc.plan)
+#         if not plan.item:
+#             frappe.throw(f"No Item linked in Subscription Plan {svc.plan}")
+
+#         # Create Sales Invoice for this plan
+#         si = frappe.new_doc("Sales Invoice")
+#         si.customer = sub_doc.customer
+#         si.due_date = frappe.utils.nowdate()
+
+#         si.append("items", {
+#             "item_code": plan.item,   # take item from Subscription Plan
+#             "qty": svc.quantity,
+#             "rate": svc.price
+#         })
+
+#         si.insert(ignore_permissions=True)
+#         si.submit()
+
+#     return "OK"
+
+
 
 
 
