@@ -3,6 +3,7 @@ import json
 import frappe
 import hashlib
 import gocardless_pro
+from frappe.query_builder import DocType
 
 
 
@@ -536,6 +537,17 @@ def handle_cli_subscription(doc, method):
 
 
 
+def cli_subscription_list():
+    CLI_Subscription = DocType("CLI Subscription")
+
+    query = (
+        frappe.qb.from_(CLI_Subscription)
+        .select(
+            CLI_Subscription.name
+        )
+    ).run(as_dict=True)
+
+    return query
 
 
 
@@ -565,6 +577,9 @@ def create_invoices_for_subscription(subscription):
         if svc.status != "Active":
             continue
 
+        if svc.sales_invoice_id:
+            continue
+
         # Fetch Subscription Plan to get item
         plan = frappe.get_doc("Subscription Plan", svc.plan)
         if not plan.item:
@@ -585,46 +600,13 @@ def create_invoices_for_subscription(subscription):
         si.submit()
         created_invoices.append((si.name, plan.plan_name or plan.name))
 
-        # 🔹 NEW PART → check GoCardless subscription & create payment
-        if mandate_id:
-            gc_subs = get_subscriptions_by_mandate(mandate_id)
-            if gc_subs.get("success") and gc_subs.get("subscriptions"):
-                for gc_sub in gc_subs["subscriptions"]:
-                    local_plan_name = (plan.plan_name or plan.name).lower().strip()
-                    gc_plan_name = gc_sub["name"].lower().strip()
+        # 🔹 Save Sales Invoice ID in service row
+        svc.sales_invoice_id = si.name
 
-                    frappe.logger().info(f"Comparing GC:{gc_plan_name} vs Local:{local_plan_name}")
-
-                    if gc_plan_name == local_plan_name:
-                        try:
-                            client = gocardless_pro.Client(
-                                access_token=token,
-                                environment="sandbox"
-                            )
-
-                            client.payments.create(params={
-                                "amount": int(si.grand_total * 100),
-                                "currency": gc_sub["currency"],   # safer than hardcoding GBP
-                                # "links": {"subscription": gc_sub["subscription_id"]},
-                                "links": {
-                                    "mandate": mandate_id,
-                                    "subscription": gc_sub["subscription_id"]
-                            },
-                                "metadata": {"invoice": si.name}
-                            })
-
-                            frappe.logger().info(
-                                f"GoCardless payment created for invoice {si.name}, plan {plan.name}"
-                            )
-
-                        except Exception as e:
-                            frappe.log_error(f"GoCardless Error: {str(e)}", "GoCardless Payment Error")
-                            frappe.throw(f"GoCardless Payment Error: {str(e)}")
+    # 🔹 Save subscription so child table updates
+    sub_doc.save(ignore_permissions=True)
 
     return {"success": True, "created_invoices": created_invoices}
-
-
-
 
 
 

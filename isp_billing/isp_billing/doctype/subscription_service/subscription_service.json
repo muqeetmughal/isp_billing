@@ -12,6 +12,7 @@
   "no_of_month",
   "unit",
   "price",
+  "sales_invoice_id",
   "pay_period",
   "billing_start_date",
   "billing_end_date",
@@ -282,13 +283,18 @@
    "label": "No of Month",
    "non_negative": 1,
    "reqd": 1
+  },
+  {
+   "fieldname": "sales_invoice_id",
+   "fieldtype": "Data",
+   "label": "Sales Invoice ID"
   }
  ],
  "grid_page_length": 100,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-08-29 14:45:57.442413",
+ "modified": "2025-08-29 20:01:56.169617",
  "modified_by": "Administrator",
  "module": "Isp Billing",
  "name": "Subscription Service",

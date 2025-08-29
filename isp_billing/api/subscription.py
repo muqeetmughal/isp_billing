@@ -386,26 +386,6 @@ def add_plan_in_subscription(party, plan, start_date, end_date, qty):
 
 
 @frappe.whitelist(allow_guest=True)
-# def get_new_subscription_details(subscriber):
-
-#     Subscription = DocType("CLI Subscription")
-#     Service = DocType("Subscription Service")
-
-#     subscription = (frappe.qb.from_(Subscription)
-#             .inner_join(Service).on(Subscription.name == Service.parent)
-#             .select(
-#                 Subscription.name,
-#                 Service.plan,
-#                 Service.quantity,
-#                 Service.billing_start_date,
-#                 Service.status
-#             )
-#             .where(Subscription.name == subscriber)
-#     ).run(as_dict=True)
-
-#     return subscription
-
-
 def get_new_subscription_details(subscriber):
     Subscription = DocType("CLI Subscription")
     Service = DocType("Subscription Service")
@@ -453,43 +433,21 @@ def get_new_subscription_details(subscriber):
 
 
 
-# @frappe.whitelist()
-# def create_invoices_for_subscription(subscription):
-#     sub_doc = frappe.get_doc("CLI Subscription", subscription)
+def invoice_status():
 
-#     if not sub_doc.customer:
-#         frappe.throw("Customer is required in CLI Subscription")
+    Invoice = DocType("Sales Invoice")
 
-#     # replace with your actual child table fieldname
-#     services = sub_doc.get("service") or []  
+    query = (
+        frappe.qb.from_(Invoice)
+        .select(
+            Invoice.name,
+            Invoice.customer,
+            Invoice.status
+        )
+        .where(Invoice.name == "ACC-SINV-2025-00053")
 
-#     for svc in services:
-#         if svc.status != "Active":
-#             continue
+    ).run(as_dict=True)
 
-#         # Fetch Subscription Plan to get item
-#         plan = frappe.get_doc("Subscription Plan", svc.plan)
-#         if not plan.item:
-#             frappe.throw(f"No Item linked in Subscription Plan {svc.plan}")
-
-#         # Create Sales Invoice for this plan
-#         si = frappe.new_doc("Sales Invoice")
-#         si.customer = sub_doc.customer
-#         si.due_date = frappe.utils.nowdate()
-
-#         si.append("items", {
-#             "item_code": plan.item,   # take item from Subscription Plan
-#             "qty": svc.quantity,
-#             "rate": svc.price
-#         })
-
-#         si.insert(ignore_permissions=True)
-#         si.submit()
-
-#     return "OK"
-
-
-
-
+    return query
 
 

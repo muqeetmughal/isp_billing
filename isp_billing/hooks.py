@@ -185,9 +185,9 @@ doc_events = {
     "GoCardless Mandates": {
         "after_insert": "isp_billing.api.gocardless.process_new_mandate"
     },
-    "CLI Subscription": {
-        "before_save": "isp_billing.api.gocardless.handle_cli_subscription"
-    }
+    # "CLI Subscription": {
+    #     "before_save": "isp_billing.api.gocardless.handle_cli_subscription"
+    # }
 
 }
 
@@ -197,6 +197,14 @@ doc_events = {
 
 # Scheduled Tasks
 # ---------------
+
+
+scheduler_events = {
+    "daily": [
+        "isp_billing.api.sales_invoice.create_invoices_for_all_subscriptions"
+    ]
+}
+
 
 # scheduler_events = {
 # 	"all": [
