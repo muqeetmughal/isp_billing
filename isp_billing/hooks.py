@@ -23,6 +23,9 @@ fixtures = [
         "dt": "Web Form"
     },
     {
+        "dt": "Client Script"
+    },
+    {
         "dt": "Workspace",
         "filters": [
             ["name", "=", "CLI SECURE"]

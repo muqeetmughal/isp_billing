@@ -1,0 +1,79 @@
+[
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Lead",
+  "enabled": 1,
+  "modified": "2025-08-21 18:25:00.133413",
+  "module": null,
+  "name": "Set date in lead",
+  "script": "frappe.ui.form.on('Lead', {\r\n    onload: function(frm) {\r\n        // Set today's date on form load (only if it's a new doc)\r\n        if (frm.is_new() && !frm.doc.custom_date_added) {\r\n            frm.set_value('custom_date_added', frappe.datetime.get_today());\r\n        }\r\n    },\r\n\r\n    refresh: function(frm) {\r\n        // Restrict time_slot field to only allow hour selection (00:00, 01:00, ..., 23:00)\r\n        const time_field = frm.fields_dict['time_slot'];\r\n\r\n        if (time_field && time_field.df.fieldtype === 'Time') {\r\n            time_field.$input.on('change', function () {\r\n                let val = frm.doc.time_slot;\r\n                if (val) {\r\n                    let hour = val.split(':')[0];\r\n                    let formatted = `${hour.padStart(2, '0')}:00:00`;\r\n                    frm.set_value('time_slot', formatted);\r\n                }\r\n            });\r\n        }\r\n    }\r\n});\r\n",
+  "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Customer",
+  "enabled": 1,
+  "modified": "2025-08-21 18:31:45.443641",
+  "module": null,
+  "name": "Set date in Customer",
+  "script": "frappe.ui.form.on('Customer', {\r\n    onload: function(frm) {\r\n        // Set today's date on form load (only if it's a new doc)\r\n        if (frm.is_new() && !frm.doc.custom_date_added) {\r\n            frm.set_value('custom_date_added', frappe.datetime.get_today());\r\n        }\r\n    },\r\n\r\n    refresh: function(frm) {\r\n        // Restrict time_slot field to only allow hour selection (00:00, 01:00, ..., 23:00)\r\n        const time_field = frm.fields_dict['time_slot'];\r\n\r\n        if (time_field && time_field.df.fieldtype === 'Time') {\r\n            time_field.$input.on('change', function () {\r\n                let val = frm.doc.time_slot;\r\n                if (val) {\r\n                    let hour = val.split(':')[0];\r\n                    let formatted = `${hour.padStart(2, '0')}:00:00`;\r\n                    frm.set_value('time_slot', formatted);\r\n                }\r\n            });\r\n        }\r\n    }\r\n});\r\n",
+  "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Lead",
+  "enabled": 1,
+  "modified": "2025-08-22 16:23:08.225344",
+  "module": null,
+  "name": "Create Customer from Lead",
+  "script": "frappe.ui.form.on(\"Lead\", {\r\n    refresh: function(frm) {\r\n        // Add button on Lead form\r\n        frm.add_custom_button(__('Create Customer'), function() {\r\n            frappe.call({\r\n                method: \"frappe.client.insert\",\r\n                args: {\r\n                    doc: {\r\n                        doctype: \"Customer\",\r\n                        customer_name: frm.doc.lead_name,\r\n                        custom_email: frm.doc.email_id,\r\n                        custom_portal_login: frm.doc.email_id,\r\n                        custom_mobile_no: frm.doc.mobile_no,\r\n                        custom_street: frm.doc.custom_street,\r\n                        custom_zip_code: frm.doc.custom_zip_code,\r\n                        custom_city: frm.doc.custom_city\r\n                    }\r\n                },\r\n                callback: function(r) {\r\n                    if(!r.exc) {\r\n                        frappe.msgprint(__('Customer {0} created successfully', [r.message.name]));\r\n                        frappe.set_route(\"Form\", \"Customer\", r.message.name);\r\n                    }\r\n                }\r\n            });\r\n        },); // Optional group name\r\n    }\r\n});\r\n",
+  "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Customer",
+  "enabled": 1,
+  "modified": "2025-08-28 17:04:55.402056",
+  "module": null,
+  "name": "Send Document for E-Sign from customer",
+  "script": "\r\nfrappe.ui.form.on('Customer', {\r\n    refresh: function(frm) {\r\n        if (!frm.is_new()) {\r\n            frm.add_custom_button(__('Send Docuseal'), function() {\r\n                frappe.call({\r\n                    method: \"isp_billing.api.docuseal.get_template_list\",\r\n                    callback: function(r) {\r\n                        if (r.message) {\r\n                            let template_options = {};\r\n                            let name_count = {}; // track duplicate names\r\n\r\n                            r.message.forEach(t => {\r\n                                let display_name = t.name;\r\n\r\n                                // If this name already exists, append ID to make it unique\r\n                                if (name_count[display_name]) {\r\n                                    display_name = `${t.name} (${t.id})`;\r\n                                }\r\n                                name_count[t.name] = true;\r\n\r\n                                template_options[display_name] = t.id;\r\n                            });\r\n\r\n                            let d = new frappe.ui.Dialog({\r\n                                title: \"Send Docuseal Document\",\r\n                                fields: [\r\n                                    {\r\n                                        label: \"Template\",\r\n                                        fieldname: \"template_id\",\r\n                                        fieldtype: \"Select\",\r\n                                        options: Object.keys(template_options),\r\n                                        reqd: 1\r\n                                    },\r\n                                    {\r\n                                        label: \"Email\",\r\n                                        fieldname: \"email\",\r\n                                        fieldtype: \"Data\",\r\n                                        default: frm.doc.custom_email || frm.doc.email_id,\r\n                                        reqd: 1\r\n                                    }\r\n                                ],\r\n                                primary_action_label: \"Send\",\r\n                                primary_action(values) {\r\n                                    let selected_template_id = template_options[values.template_id];\r\n\r\n                                    frappe.call({\r\n                                        method: \"isp_billing.api.docuseal.send_docuseal_document\",\r\n                                        args: {\r\n                                            template_id: selected_template_id,\r\n                                            email: values.email\r\n                                        },\r\n                                        callback: function(res) {\r\n                                            if (res.message.status === \"success\") {\r\n                                                frappe.msgprint(\"Docuseal Document Sent Successfully!\");\r\n                                            } else {\r\n                                                frappe.msgprint(\"Failed to send document\");\r\n                                            }\r\n                                            d.hide();\r\n                                        }\r\n                                    });\r\n                                }\r\n                            });\r\n\r\n                            d.show();\r\n                        }\r\n                    }\r\n                });\r\n            });\r\n        }\r\n    }\r\n});\r\n",
+  "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Sales Order",
+  "enabled": 1,
+  "modified": "2025-08-28 18:41:22.224327",
+  "module": null,
+  "name": "Add pdf to file",
+  "script": "frappe.ui.form.on('Sales Order', {\r\n    refresh: function(frm) {\r\n        if (!frm.is_new()) {\r\n            // Override default print_doc function\r\n            frm.print_doc = function(print_format = null) {\r\n                frappe.call({\r\n                    method: \"isp_billing.api.docuseal.attach_sales_order_pdf\",\r\n                    args: {\r\n                        docname: frm.doc.name,\r\n                        print_format: print_format || frm.meta.default_print_format || \"Standard\"\r\n                    },\r\n                    callback: function(r) {\r\n                        if (!r.exc) {\r\n                            frappe.show_alert({message: __(\"PDF attached successfully\"), indicator:'green'});\r\n                            frm.reload_doc();\r\n                        }\r\n                    }\r\n                });\r\n\r\n                // Still open the normal print preview window\r\n                frappe.ui.form.view_print(frm, print_format || frm.meta.default_print_format || \"Standard\");\r\n            }\r\n        }\r\n    }\r\n});\r\n",
+  "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "CLI Subscription",
+  "enabled": 1,
+  "modified": "2025-08-29 13:15:51.823007",
+  "module": "Isp Billing",
+  "name": "get cost of plan",
+  "script": "frappe.ui.form.on(\"Subscription Service\", {\r\n    plan: function(frm, cdt, cdn) {\r\n        let row = locals[cdt][cdn];\r\n\r\n        if (row.plan) {\r\n            frappe.db.get_value(\"Subscription Plan\", row.plan, \"cost\")\r\n                .then(r => {\r\n                    if (r.message) {\r\n                        frappe.model.set_value(cdt, cdn, \"price\", r.message.cost);\r\n                    }\r\n                });\r\n        }\r\n    }\r\n});\r\n\r\n\r\n\r\n// frappe.db.get_value(\"Subscription Plan\", row.plan, [\"cost\", \"currency\"])\r\n//     .then(r => {\r\n//         if (r.message) {\r\n//             frappe.model.set_value(cdt, cdn, \"price\", r.message.cost);\r\n//             frappe.model.set_value(cdt, cdn, \"currency\", r.message.currency);\r\n//         }\r\n//     });\r\n",
+  "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "CLI Subscription",
+  "enabled": 1,
+  "modified": "2025-08-29 21:48:04.343062",
+  "module": "Isp Billing",
+  "name": "create sales invoices for CLI Subscription",
+  "script": "frappe.ui.form.on('CLI Subscription', {\r\n    refresh: function(frm) {\r\n        if (!frm.is_new()) {\r\n            frm.add_custom_button(__('Generate Invoices'), function() {\r\n                frappe.call({\r\n                    method: \"isp_billing.api.gocardless.create_invoices_for_subscription\",\r\n                    args: {\r\n                        subscription: frm.doc.name\r\n                    },\r\n                    callback: function(r) {\r\n                        if (!r.exc) {\r\n                            frappe.msgprint(__(\"Sales Invoices created successfully\"));\r\n                            frm.reload_doc();\r\n                        }\r\n                    }\r\n                });\r\n            });\r\n        }\r\n    }\r\n});\r\n",
+  "view": "Form"
+ }
+]
