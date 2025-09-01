@@ -78,8 +78,8 @@ const SupportTicket = () => {
     if (
       !subject.trim() ||
       !description.trim() ||
-      !customer.trim() ||
-      !issueType
+      !customer.trim() 
+      // !issueType
     ) {
       alert("Please fill in all required fields.");
       return;
