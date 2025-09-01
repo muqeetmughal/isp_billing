@@ -113,15 +113,12 @@ def get_customer_name_by_email(email):
 
 
 
-
-
-
 def create_portal_user(doc, method):
     """Create portal user when a Customer is created."""
 
     # Skip if email not set
     if not doc.custom_email:
-        return("Custom Email is required to create a portal user")
+        return "Custom Email is required to create a portal user"
 
     # Check if user already exists
     if frappe.db.exists("User", doc.custom_email):
@@ -136,7 +133,7 @@ def create_portal_user(doc, method):
         "doctype": "User",
         "email": doc.custom_email,
         "first_name": doc.customer_name,
-        "send_welcome_email": 0,
+        "send_welcome_email": 0,   # we'll handle email manually
         "user_type": "Website User"  # portal user
     })
     user.insert(ignore_permissions=True)
@@ -145,23 +142,30 @@ def create_portal_user(doc, method):
     user = frappe.get_doc("User", user.name)
     if user:
         user.db_set("new_password", password)
-        user.save()
+        user.save(ignore_permissions=True)
         frappe.db.commit()
 
+    # Store credentials in Customer
     frappe.db.set_value(
-    "Customer",
-    doc.name,
-    {
-        "custom_portal_password": password,
-        "custom_portal_login": doc.custom_email
-    }
-)
+        "Customer",
+        doc.name,
+        {
+            "custom_portal_password": password,
+            "custom_portal_login": doc.custom_email
+        }
+    )
 
+    # Check if any Email Account is set up before sending
+    if frappe.db.exists("Email Account", {"enable_outgoing": 1}):
+        send_welcome_email(doc, password)
+        frappe.msgprint(f"Portal user created and welcome email sent to {doc.custom_email}")
+    else:
+        frappe.msgprint(
+            f"Portal user created for {doc.custom_email}, "
+            "but no outgoing Email Account is configured. "
+            "Please set up Email Account to enable welcome emails."
+        )
 
-    # Send welcome email
-    send_welcome_email(doc, password)
-
-    frappe.msgprint(f"Portal user created and welcome email sent to {doc.custom_email}")
 
 
 def send_welcome_email(doc, password):
