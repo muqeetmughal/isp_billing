@@ -157,6 +157,34 @@ def get_isp_billing_settings():
     sla = frappe.get_single("Isp Billing Setting")
     return sla.sla_document
 
+# def send_sla_on_issue_create(doc, method):
+#     """Send SLA email with document when Issue is created"""
+#     if not doc.raised_by:
+#         return
+
+#     # Get SLA document
+#     sla_document = get_isp_billing_settings()
+
+#     # Get Email Template
+#     email_template = frappe.get_doc("Email Template", "Send SLA when Issue create")
+#     subject = frappe.render_template(email_template.subject, {"doc": doc})
+#     message = frappe.render_template(email_template.response, {"doc": doc})
+
+#     # Send mail with attachment
+#     attachments = []
+#     if sla_document:
+#         file_doc = frappe.get_doc("File", {"file_url": sla_document})
+#         attachments.append({"fname": file_doc.file_name, "fcontent": file_doc.get_content()})
+
+#     frappe.sendmail(
+#         recipients=[doc.raised_by],
+#         subject=subject,
+#         message=message,
+#         attachments=attachments,
+#         reference_doctype=doc.doctype,
+#         reference_name=doc.name
+#     )
+
 def send_sla_on_issue_create(doc, method):
     """Send SLA email with document when Issue is created"""
     if not doc.raised_by:
@@ -170,21 +198,27 @@ def send_sla_on_issue_create(doc, method):
     subject = frappe.render_template(email_template.subject, {"doc": doc})
     message = frappe.render_template(email_template.response, {"doc": doc})
 
-    # Send mail with attachment
+    # Prepare attachment
     attachments = []
     if sla_document:
         file_doc = frappe.get_doc("File", {"file_url": sla_document})
         attachments.append({"fname": file_doc.file_name, "fcontent": file_doc.get_content()})
 
-    frappe.sendmail(
-        recipients=[doc.raised_by],
-        subject=subject,
-        message=message,
-        attachments=attachments,
-        reference_doctype=doc.doctype,
-        reference_name=doc.name
-    )
-
+    # Check if outgoing Email Account exists
+    if frappe.db.exists("Email Account", {"enable_outgoing": 1}):
+        frappe.sendmail(
+            recipients=[doc.raised_by],
+            subject=subject,
+            message=message,
+            attachments=attachments,
+            reference_doctype=doc.doctype,
+            reference_name=doc.name
+        )
+    else:
+        frappe.msgprint(
+            "SLA email not sent because no outgoing Email Account is configured. "
+            "Please set up an Email Account in Email Settings."
+        )
 
 
 
