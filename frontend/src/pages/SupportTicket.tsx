@@ -246,13 +246,13 @@ const SupportTicket = () => {
 
               <div>
                 <label className="block text-sm font-medium mb-1 text-gray-700">
-                  Issue Type <span className="text-red-500">*</span>
+                  Issue Type 
                 </label>
                 <select
                   value={issueType}
                   onChange={(e) => setIssueType(e.target.value)}
                   className="w-full border border-gray-300 px-3 py-2 rounded-lg focus:ring-2 focus:ring-[#7d4fff] focus:border-[#7d4fff] outline-none transition disabled:bg-gray-100"
-                  required
+                  
                   disabled={submitting}
                 >
                   <option value="">Select Issue Type</option>
