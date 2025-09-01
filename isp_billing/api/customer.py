@@ -121,7 +121,7 @@ def create_portal_user(doc, method):
 
     # Skip if email not set
     if not doc.custom_email:
-        frappe.throw("Custom Email is required to create a portal user")
+        return("Custom Email is required to create a portal user")
 
     # Check if user already exists
     if frappe.db.exists("User", doc.custom_email):
@@ -142,15 +142,21 @@ def create_portal_user(doc, method):
     user.insert(ignore_permissions=True)
 
     # Set password
-    # frappe.utils.password.update_password(user.name, password)
     user = frappe.get_doc("User", user.name)
     if user:
         user.db_set("new_password", password)
         user.save()
         frappe.db.commit()
 
-    # Save password back to customer field
-    frappe.db.set_value("Customer", doc.name, "custom_portal_password", password)
+    frappe.db.set_value(
+    "Customer",
+    doc.name,
+    {
+        "custom_portal_password": password,
+        "custom_portal_login": doc.custom_email
+    }
+)
+
 
     # Send welcome email
     send_welcome_email(doc, password)
