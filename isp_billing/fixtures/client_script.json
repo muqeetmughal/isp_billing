@@ -59,10 +59,10 @@
   "doctype": "Client Script",
   "dt": "CLI Subscription",
   "enabled": 1,
-  "modified": "2025-08-29 13:15:51.823007",
+  "modified": "2025-09-01 20:48:22.615803",
   "module": "Isp Billing",
   "name": "get cost of plan",
-  "script": "frappe.ui.form.on(\"Subscription Service\", {\r\n    plan: function(frm, cdt, cdn) {\r\n        let row = locals[cdt][cdn];\r\n\r\n        if (row.plan) {\r\n            frappe.db.get_value(\"Subscription Plan\", row.plan, \"cost\")\r\n                .then(r => {\r\n                    if (r.message) {\r\n                        frappe.model.set_value(cdt, cdn, \"price\", r.message.cost);\r\n                    }\r\n                });\r\n        }\r\n    }\r\n});\r\n\r\n\r\n\r\n// frappe.db.get_value(\"Subscription Plan\", row.plan, [\"cost\", \"currency\"])\r\n//     .then(r => {\r\n//         if (r.message) {\r\n//             frappe.model.set_value(cdt, cdn, \"price\", r.message.cost);\r\n//             frappe.model.set_value(cdt, cdn, \"currency\", r.message.currency);\r\n//         }\r\n//     });\r\n",
+  "script": "frappe.ui.form.on(\"Subscription Service\", {\r\n    plan: function(frm, cdt, cdn) {\r\n        let row = locals[cdt][cdn];\r\n\r\n        if (row.plan) {\r\n            frappe.db.get_value(\"Subscription Plan\", row.plan, \"custom_total_cost\")\r\n                .then(r => {\r\n                    if (r.message) {\r\n                        frappe.model.set_value(cdt, cdn, \"price\", r.message.cost);\r\n                    }\r\n                });\r\n        }\r\n    }\r\n});\r\n\r\n\r\n\r\n// frappe.db.get_value(\"Subscription Plan\", row.plan, [\"cost\", \"currency\"])\r\n//     .then(r => {\r\n//         if (r.message) {\r\n//             frappe.model.set_value(cdt, cdn, \"price\", r.message.cost);\r\n//             frappe.model.set_value(cdt, cdn, \"currency\", r.message.currency);\r\n//         }\r\n//     });\r\n",
   "view": "Form"
  },
  {
@@ -75,5 +75,38 @@
   "name": "create sales invoices for CLI Subscription",
   "script": "frappe.ui.form.on('CLI Subscription', {\r\n    refresh: function(frm) {\r\n        if (!frm.is_new()) {\r\n            frm.add_custom_button(__('Generate Invoices'), function() {\r\n                frappe.call({\r\n                    method: \"isp_billing.api.gocardless.create_invoices_for_subscription\",\r\n                    args: {\r\n                        subscription: frm.doc.name\r\n                    },\r\n                    callback: function(r) {\r\n                        if (!r.exc) {\r\n                            frappe.msgprint(__(\"Sales Invoices created successfully\"));\r\n                            frm.reload_doc();\r\n                        }\r\n                    }\r\n                });\r\n            });\r\n        }\r\n    }\r\n});\r\n",
   "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Subscription Plan",
+  "enabled": 1,
+  "modified": "2025-09-01 20:41:57.379955",
+  "module": "Isp Billing",
+  "name": "Add Vat in the Subscription Plan",
+  "script": "frappe.ui.form.on('Subscription Plan', {\r\n    cost: function(frm) {\r\n        if (frm.doc.cost && frm.doc.custom_vat_percentage) {\r\n            let final_cost = frm.doc.cost * (1 + (frm.doc.custom_vat_percentage / 100));\r\n            frm.set_value('custom_total_cost', final_cost);\r\n        }\r\n    },\r\n\r\n    custom_vat_percentage: function(frm) {\r\n        if (frm.doc.cost && frm.doc.custom_vat_percentage) {\r\n            let final_cost = frm.doc.cost * (1 + (frm.doc.custom_vat_percentage / 100));\r\n            frm.set_value('custom_total_cost', final_cost);\r\n        }\r\n    }\r\n});\r\n",
+  "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Sales Invoice",
+  "enabled": 1,
+  "modified": "2025-09-01 21:04:04.150441",
+  "module": "Isp Billing",
+  "name": "Create one sales invoice gocardless payment entry",
+  "script": "frappe.ui.form.on(\"Sales Invoice\", {\r\n    refresh: function(frm) {\r\n        if (!frm.is_new()) {\r\n            frm.add_custom_button(__('Create GoCardless Payment'), function() {\r\n                frappe.call({\r\n                    method: \"isp_billing.api.gocardless.create_one_sales_invoice_payment\",\r\n                    args: {\r\n                        invoice_name: frm.doc.name\r\n                    },\r\n                    callback: function(r) {\r\n                        if (!r.exc) {\r\n                            if (r.message && r.message.success) {\r\n                                frappe.msgprint(\r\n                                    __(\"GoCardless Payment created successfully. Payment ID: \" + r.message.payment_id)\r\n                                );\r\n                            }\r\n                        }\r\n                    }\r\n                });\r\n            }, __(\"GoCardless\"));\r\n        }\r\n    }\r\n});\r\n",
+  "view": "Form"
+ },
+ {
+  "docstatus": 0,
+  "doctype": "Client Script",
+  "dt": "Sales Invoice",
+  "enabled": 1,
+  "modified": "2025-09-01 21:13:00.868450",
+  "module": null,
+  "name": "Bulk gocardless payment creation from sales invoice",
+  "script": "frappe.listview_settings['Sales Invoice'] = {\r\n    onload: function(listview) {\r\n        listview.page.add_action_item(__('Create GoCardless Payment'), function() {\r\n            let selected = listview.get_checked_items();\r\n\r\n            if (!selected.length) {\r\n                frappe.msgprint(__('Please select at least one Sales Invoice.'));\r\n                return;\r\n            }\r\n\r\n            frappe.call({\r\n                method: \"isp_billing.api.gocardless.bulk_create_gocardless_payments\",\r\n                args: {\r\n                    invoices: selected.map(d => d.name)\r\n                },\r\n                callback: function(r) {\r\n                    if (!r.exc) {\r\n                        let msg = \"\";\r\n                        r.message.forEach(res => {\r\n                            if (res.success) {\r\n                                msg += `<p>✅ ${res.invoice}: Payment ID ${res.payment_id}</p>`;\r\n                            } else {\r\n                                msg += `<p>❌ ${res.invoice}: ${res.error}</p>`;\r\n                            }\r\n                        });\r\n                        frappe.msgprint({\r\n                            title: __('GoCardless Payments Result'),\r\n                            message: msg,\r\n                            indicator: 'blue'\r\n                        });\r\n                        listview.refresh();\r\n                    }\r\n                }\r\n            });\r\n        });\r\n    }\r\n};\r\n",
+  "view": "List"
  }
 ]

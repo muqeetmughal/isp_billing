@@ -111,34 +111,6 @@ def create_sales_order_from_subscription_plan(subscription_plan_name, customer):
 
 
 
-@frappe.whitelist(allow_guest=True)
-def quotation_to_subscription(customer, plan, quotation, qty=1):
-
-    doc = frappe.get_doc({
-        "doctype": "Subscription",
-        "party_type": "Customer",
-        "party": customer,
-        # "start_date": start_date,
-        # "end_date": end_date,
-        "start_date": "2025-08-21",
-        "end_date": "2025-10-21",
-        "custom_quotation": quotation
-    })
-    
-    doc.append("plans", {
-        "plan": plan,
-        "qty": qty
-    })
-    doc.save(ignore_permissions=True)
-    frappe.db.commit()
-    frappe.local.response.http_status_code = 201
-    return {
-        "msg": "Plan added successfully",
-        "subscription": doc.name,
-        "success": True
-    }
-
-
 
 
 
@@ -400,7 +372,18 @@ def get_new_subscription_details(subscriber):
             Service.quantity,
             Service.billing_start_date,
             Service.status,
-            Service.price
+            Service.price,
+            Service.description,
+            Service.no_of_month,
+            Service.pay_period,
+            Service.unit,
+            Service.service_start_date,
+            Service.cli,
+            Service.location,
+            Service.router,
+            Service.service_login,
+            Service.service_password,
+            Service.ipv4_assignment_method
 
         )
         .where(Subscription.name == subscriber)
@@ -423,31 +406,20 @@ def get_new_subscription_details(subscriber):
             "quantity": row["quantity"],
             "billing_start_date": row["billing_start_date"],
             "status": row["status"],
-            "price": row["price"]
+            "price": row["price"],
+            "description": row["description"],
+            "no_of_month": row["no_of_month"],
+            "pay_period": row["pay_period"],
+            "location": row["location"],
+            "router": row["router"],
+            "service_login": row["service_login"],
+            "service_password": row["service_password"],
+            "ipv4_assignment_method": row["ipv4_assignment_method"]
         })
 
     return list(subscriptions.values())
 
 
 
-
-
-
-def invoice_status():
-
-    Invoice = DocType("Sales Invoice")
-
-    query = (
-        frappe.qb.from_(Invoice)
-        .select(
-            Invoice.name,
-            Invoice.customer,
-            Invoice.status
-        )
-        .where(Invoice.name == "ACC-SINV-2025-00053")
-
-    ).run(as_dict=True)
-
-    return query
 
 

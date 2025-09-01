@@ -14,6 +14,7 @@
   "price",
   "sales_invoice_id",
   "pay_period",
+  "service_start_date",
   "billing_start_date",
   "billing_end_date",
   "status",
@@ -21,25 +22,11 @@
   "location",
   "static_ip",
   "pppoe_password",
-  "ip_look_default_apn",
   "realm",
   "router",
-  "access_device",
   "service_login",
   "service_password",
-  "ipv6_network",
   "ipv4_assignment_method",
-  "delegated_ipv6_network",
-  "macs",
-  "port_id",
-  "discount_section",
-  "discount",
-  "discount_value",
-  "discount_start_date",
-  "discount_end_date",
-  "one_time_service_section",
-  "additional_one_time_service",
-  "one_time_plan",
   "recurring_service_section",
   "pax8_updated_date",
   "pax8_subscription_id",
@@ -102,27 +89,6 @@
    "label": "Billing End Date"
   },
   {
-   "default": "0",
-   "fieldname": "discount",
-   "fieldtype": "Check",
-   "label": "Discount"
-  },
-  {
-   "fieldname": "discount_value",
-   "fieldtype": "Percent",
-   "label": "Discount Value"
-  },
-  {
-   "fieldname": "discount_start_date",
-   "fieldtype": "Date",
-   "label": "Discount Start Date"
-  },
-  {
-   "fieldname": "discount_end_date",
-   "fieldtype": "Date",
-   "label": "Discount End Date"
-  },
-  {
    "fieldname": "status",
    "fieldtype": "Select",
    "label": "Status",
@@ -150,21 +116,9 @@
    "label": "PPPOE Password"
   },
   {
-   "default": "0",
-   "fieldname": "ip_look_default_apn",
-   "fieldtype": "Check",
-   "label": "IP LOOK Default APN"
-  },
-  {
    "fieldname": "realm",
    "fieldtype": "Data",
    "label": "Realm"
-  },
-  {
-   "default": "None",
-   "fieldname": "access_device",
-   "fieldtype": "Data",
-   "label": "Access Device"
   },
   {
    "fieldname": "router",
@@ -187,26 +141,6 @@
    "fieldtype": "Select",
    "label": "IPV4 Assignment Method",
    "options": "None (Router will assign IP)\nPermanent IP (from Static IPs)\nDynamic IP (from IP Pools)"
-  },
-  {
-   "fieldname": "ipv6_network",
-   "fieldtype": "Data",
-   "label": "IPV6 Network"
-  },
-  {
-   "fieldname": "delegated_ipv6_network",
-   "fieldtype": "Data",
-   "label": "Delegated IPV6 Network"
-  },
-  {
-   "fieldname": "macs",
-   "fieldtype": "Data",
-   "label": "MAC(s)"
-  },
-  {
-   "fieldname": "port_id",
-   "fieldtype": "Data",
-   "label": "Port ID"
   },
   {
    "collapsible": 1,
@@ -247,30 +181,6 @@
    "label": "Pax8 Invoice Item ID"
   },
   {
-   "default": "0",
-   "fieldname": "additional_one_time_service",
-   "fieldtype": "Check",
-   "label": "Additional One Time Service"
-  },
-  {
-   "fieldname": "one_time_plan",
-   "fieldtype": "Link",
-   "label": "One Time Plan",
-   "options": "Subscription Plan"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "discount_section",
-   "fieldtype": "Section Break",
-   "label": "Discount"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "one_time_service_section",
-   "fieldtype": "Section Break",
-   "label": "One Time Service"
-  },
-  {
    "collapsible": 1,
    "fieldname": "recurring_service_section",
    "fieldtype": "Section Break",
@@ -288,13 +198,18 @@
    "fieldname": "sales_invoice_id",
    "fieldtype": "Data",
    "label": "Sales Invoice ID"
+  },
+  {
+   "fieldname": "service_start_date",
+   "fieldtype": "Date",
+   "label": "Service Start Date"
   }
  ],
  "grid_page_length": 100,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-08-29 20:01:56.169617",
+ "modified": "2025-09-01 15:38:27.938968",
  "modified_by": "Administrator",
  "module": "Isp Billing",
  "name": "Subscription Service",

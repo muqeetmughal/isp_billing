@@ -5,7 +5,6 @@ import Login from "./pages/Login";
 import PrivateRoute from "./component/PrivateRoute";
 import Invoices from "./pages/Invoices";
 import Subscription from "./pages/Subscription";
-import Success from "./pages/success";
 import MainLayout from "./layouts/MainLayout";
 import Home from "./pages/Home";
 import SupportTicket from "./pages/SupportTicket";
@@ -25,7 +24,6 @@ function Client() {
               <Route path="/invoices" element={<Invoices />} />
               <Route path="/subscription" element={<Subscription />} />
               <Route path="/support_tickets" element={<SupportTicket />} />
-              <Route path="/success/:id" element={<Success />} />
               <Route path="*" element={<>404 Not Found</>} />
             </Route>
           </Route>

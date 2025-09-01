@@ -125,3 +125,18 @@ def create_gocardless_mandate():
 
 
 
+
+
+
+
+
+
+
+def change_status():
+
+    doc = frappe.db.set_value("Sales Invoice", "ACC-SINV-2025-00069", "custom_gocardless_payment_status", "Paid")
+
+    return{
+        "success": True,
+        "data": doc
+    }

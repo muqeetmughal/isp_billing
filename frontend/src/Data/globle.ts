@@ -13,8 +13,9 @@ export interface SupportTicketData {
 
 export interface PlanDetail {
   plan: string;
-  qty: number;
-  cost: number;
+  quantity: number;
+  price: number;
+  status: string;
 }
 
 export interface SubscriptionType {
@@ -22,6 +23,7 @@ export interface SubscriptionType {
   party_type: string;
   party: string;
   status: string;
+  customer: string;
   plans: PlanDetail[];
 }
 
@@ -32,6 +34,23 @@ export interface SubscriptionPlan {
   item: string;
   features?: string[];
   price_determination: string;
+  status: string;
+  customer: string;
+  quantity: number;
+  price: number;
+  billing_start_date: string;
+  plan: string;
+  ipv4_assignment_method: string;
+  description: string;
+  unit: string;
+  no_of_month: string;
+  pay_period: string;
+  location: string;
+  service_login: string;
+  service_password: string;
+  router: string;
+  service_start_date: string
+
 }
 
 export interface Invoice {

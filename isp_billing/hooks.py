@@ -16,7 +16,7 @@ fixtures = [
     {
         "dt": "Custom Field",
         "filters": [
-            ["dt", "in", ["Customer", "Lead", "Issue", "Quotation", "Subscription"]]
+            ["dt", "in", ["Customer", "Lead", "Issue", "Quotation", "Subscription", "Subscription Plan", "Sales Invoice"]]
         ]
     },
     {
@@ -176,9 +176,6 @@ fixtures = [
 
 
 doc_events = {
-    # "Issue": {
-    #     "after_insert": "isp_billing.api.issue.send_sla_on_issue_create"
-    # },
     "Customer": {
         "after_insert": "isp_billing.api.customer.create_portal_user"
     },
@@ -188,9 +185,9 @@ doc_events = {
     "GoCardless Mandates": {
         "after_insert": "isp_billing.api.gocardless.process_new_mandate"
     },
-    "Sales Invoice": {
-        "on_submit": "isp_billing.api.gocardless.create_one_off_payment"
-    }
+    # "Sales Invoice": {
+    #     "on_submit": "isp_billing.api.gocardless.create_one_off_payment"
+    # }
     # "CLI Subscription": {
     #     "before_save": "isp_billing.api.gocardless.handle_cli_subscription"
     # }

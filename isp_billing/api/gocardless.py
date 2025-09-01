@@ -349,6 +349,48 @@ def gocardless_webhook():
                     "status": event.get("details", {}).get("cause", "pending")
                 })
                 doc.insert(ignore_permissions=True)
+            elif event_type == "payments" and action == "created":
+                payment_id = event.get("links", {}).get("payment")
+
+                # ✅ Get full payment details using your existing function
+                payment_details = get_gocardless_payment_details(payment_id)
+
+                frappe.logger().info(f"New Payment Created: {payment_details}")
+
+                # ✅ Extract ERPNext Sales Invoice ID from metadata
+                invoice_id = payment_details.get("invoice_detail", {}).get("erpnext_invoice")
+
+                if invoice_id:
+                    try:
+                        # Fetch Sales Invoice
+                        si = frappe.get_doc("Sales Invoice", invoice_id)
+
+                        # Update custom fields
+                        si.db_set("custom_gocardless_payment_id", payment_details.get("payment_id"))
+                        si.db_set("custom_gocardless_payment_status", payment_details.get("status"))
+
+                        frappe.logger().info(f"Updated Sales Invoice {invoice_id} with GoCardless payment details")
+
+                    except Exception as e:
+                        frappe.log_error(frappe.get_traceback(), f"Error updating Sales Invoice {invoice_id} with GoCardless Payment")
+
+            elif event_type == "payments":
+                payment_id = event.get("links", {}).get("payment")
+
+                # ✅ Get latest payment details
+                payment_details = get_gocardless_payment_details(payment_id)
+
+                frappe.logger().info(f"Payment Event Received: {payment_details}")
+
+                # If this is an update (status change), find Sales Invoice using custom_gocardless_payment_id
+                try:
+                    si = frappe.db.get_value("Sales Invoice", {"custom_gocardless_payment_id": payment_id}, "name")
+                    if si:
+                        frappe.db.set_value("Sales Invoice", si, "custom_gocardless_payment_status", payment_details.get("status"))
+                        frappe.logger().info(f"Updated Sales Invoice {si} status to {payment_details.get('status')}")
+                except Exception as e:
+                    frappe.log_error(frappe.get_traceback(), f"Error updating Sales Invoice for Payment {payment_id}")
+
 
         return "Webhook received"
 
@@ -605,52 +647,6 @@ Create one off paymet in the gocardless
 """
 
 @frappe.whitelist()
-# def create_one_off_payment(invoice_name):
-#     """Create a one-off payment in GoCardless for a given Sales Invoice"""
-
-#     # Fetch Sales Invoice
-#     si = frappe.get_doc("Sales Invoice", invoice_name)
-
-#     if not si.customer:
-#         frappe.throw("Customer is required in Sales Invoice")
-
-#     # Get mandate from customer
-#     customer_doc = frappe.get_doc("Customer", si.customer)
-#     mandate_id = customer_doc.custom_gocardless_mandate_id
-#     if not mandate_id:
-#         frappe.throw(f"No GoCardless Mandate ID found for customer {si.customer}")
-
-#     # Get GoCardless access token
-#     access_token = get_gocardless_access_token()
-#     token = access_token.get("access_token")
-
-#     # Init client
-#     client = gocardless_pro.Client(
-#         access_token=token,
-#         environment="sandbox"  # 🔹 change to 'live' in production
-#     )
-
-#     try:
-#         # Create payment
-#         payment = client.payments.create(params={
-#             "amount": int(si.grand_total * 100),   # pence/cents, no decimals
-#             "currency": si.currency or "GBP",      # fallback to GBP
-#             "links": {
-#                 "mandate": mandate_id              # 🔹 must link to mandate
-#             },
-#             "metadata": {
-#                 "erpnext_invoice": si.name,
-#                 "customer": si.customer
-#             }
-#         })
-
-#         frappe.msgprint(f"GoCardless One-Off Payment created: {payment.id}")
-#         return {"success": True, "payment_id": payment.id}
-
-#     except Exception as e:
-#         frappe.log_error(frappe.get_traceback(), "GoCardless One-Off Payment Error")
-#         frappe.throw(f"GoCardless Payment Error: {str(e)}")
-
 
 def create_one_off_payment(doc, method=None):
     """Create a one-off payment in GoCardless for a given Sales Invoice"""
@@ -698,7 +694,143 @@ def create_one_off_payment(doc, method=None):
 
 
 
+import frappe
+import gocardless_pro
+from frappe import _
 
+@frappe.whitelist()
+def create_one_sales_invoice_payment(invoice_name):
+    """Create a one-off payment in GoCardless for a given Sales Invoice"""
+
+    si = frappe.get_doc("Sales Invoice", invoice_name)
+
+    if not si.customer:
+        frappe.throw(_("Customer is required in Sales Invoice"))
+
+    customer_doc = frappe.get_doc("Customer", si.customer)
+    mandate_id = customer_doc.custom_gocardless_mandate_id
+    if not mandate_id:
+        frappe.throw(_(f"No GoCardless Mandate ID found for customer {si.customer}"))
+
+    access_token = get_gocardless_access_token()
+    token = access_token.get("access_token")
+
+    client = gocardless_pro.Client(
+        access_token=token,
+        environment="sandbox"
+    )
+
+    try:
+        payment = client.payments.create(params={
+            "amount": int(si.grand_total * 100),
+            "currency": si.currency or "GBP",
+            "links": {
+                "mandate": mandate_id
+            },
+            "metadata": {
+                "erpnext_invoice": si.name,
+                "customer": si.customer
+            }
+        })
+
+        return {"success": True, "payment_id": payment.id}
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "GoCardless One-Off Payment Error")
+        frappe.throw(f"GoCardless Payment Error: {str(e)}")
+
+
+
+
+
+
+
+
+
+
+
+
+
+import frappe
+
+@frappe.whitelist()
+def bulk_create_gocardless_payments(invoices):
+    """
+    Create GoCardless one-off payments for multiple Sales Invoices.
+    invoices: list of Sales Invoice names
+    """
+    if isinstance(invoices, str):
+        invoices = frappe.parse_json(invoices)
+
+    results = []
+
+    for inv in invoices:
+        try:
+            res = create_one_sales_invoice_payment(inv)
+            results.append({
+                "invoice": inv,
+                "success": True,
+                "payment_id": res.get("payment_id")
+            })
+        except Exception as e:
+            frappe.log_error(frappe.get_traceback(), "GoCardless Bulk Payment Error")
+            results.append({
+                "invoice": inv,
+                "success": False,
+                "error": str(e)
+            })
+
+    return results
+
+
+
+
+
+
+
+
+
+
+
+
+
+@frappe.whitelist()
+def get_gocardless_payment_details(payment_id: str):
+    """Fetch full payment details (with metadata, links, org details etc.) from GoCardless"""
+
+    access_token = get_gocardless_access_token()
+    token = access_token.get("access_token")
+
+    try:
+
+        client = gocardless_pro.Client(
+            access_token=token,
+            environment="sandbox"  # 🔹 change to 'live' in production
+        )
+
+        payment = client.payments.get(payment_id)
+
+        # metadata = payment.metadata.erpnext_invoice
+        mandate = payment.links.mandate
+        creditor = payment.links.creditor
+        incoive_detail = payment.metadata
+     
+
+        return {
+            "payment_id": payment.id,
+            "mandate": mandate,
+            "creditor": creditor,
+            "invoice_detail": incoive_detail,
+            "status": payment.status
+        
+        }
+
+
+
+    except Exception as e:
+        return e
+
+   
 
 
 
