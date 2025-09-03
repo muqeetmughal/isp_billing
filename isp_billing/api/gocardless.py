@@ -382,14 +382,57 @@ def gocardless_webhook():
 
                 frappe.logger().info(f"Payment Event Received: {payment_details}")
 
-                # If this is an update (status change), find Sales Invoice using custom_gocardless_payment_id
                 try:
-                    si = frappe.db.get_value("Sales Invoice", {"custom_gocardless_payment_id": payment_id}, "name")
-                    if si:
-                        frappe.db.set_value("Sales Invoice", si, "custom_gocardless_payment_status", payment_details.get("status"))
-                        frappe.logger().info(f"Updated Sales Invoice {si} status to {payment_details.get('status')}")
+                    # Find Sales Invoice using custom_gocardless_payment_id
+                    si_name = frappe.db.get_value("Sales Invoice", {"custom_gocardless_payment_id": payment_id}, "name")
+                    if si_name:
+                        # ✅ 1) Always update status first
+                        frappe.db.set_value("Sales Invoice", si_name, "custom_gocardless_payment_status", payment_details.get("status"))
+                        frappe.logger().info(f"Updated Sales Invoice {si_name} status to {payment_details.get('status')}")
+
+                        # ✅ 2) If status is "paid_out" → Create Payment Entry
+                        if payment_details.get("status") == "paid_out":
+                            si = frappe.get_doc("Sales Invoice", si_name)
+
+                            # Avoid duplicate Payment Entries
+                            existing_pe = frappe.db.exists(
+                                "Payment Entry",
+                                {
+                                    "reference_no": payment_id,
+                                    "party_type": "Customer",
+                                    "party": si.customer
+                                }
+                            )
+
+                            if not existing_pe:
+                                pe = frappe.get_doc({
+                                    "doctype": "Payment Entry",
+                                    "payment_type": "Receive",
+                                    "company": si.company,
+                                    "posting_date": frappe.utils.nowdate(),
+                                    "party_type": "Customer",
+                                    "party": si.customer,
+                                    "paid_from": frappe.get_value("Company", si.company, "1310 - Debtors - CLI SECURE"),
+                                    "paid_to": frappe.get_value("Company", si.company, "GoCardless-DIRECT DEBIT - GoCardless - CLI SECURE"),
+                                    "paid_amount": si.outstanding_amount,
+                                    "received_amount": si.outstanding_amount,
+                                    "reference_no": payment_id,
+                                    "reference_date": frappe.utils.nowdate(),
+                                    "references": [{
+                                        "reference_doctype": "Sales Invoice",
+                                        "reference_name": si.name,
+                                        "allocated_amount": si.outstanding_amount
+                                    }]
+                                })
+                                pe.insert(ignore_permissions=True)
+                                pe.submit()
+
+                                frappe.logger().info(f"✅ Payment Entry {pe.name} created for Sales Invoice {si.name}")
+                            else:
+                                frappe.logger().info(f"ℹ️ Payment Entry already exists for Sales Invoice {si_name} and Payment {payment_id}")
+
                 except Exception as e:
-                    frappe.log_error(frappe.get_traceback(), f"Error updating Sales Invoice for Payment {payment_id}")
+                    frappe.log_error(frappe.get_traceback(), f"Error handling Payment {payment_id}")
 
 
         return "Webhook received"
@@ -636,6 +679,24 @@ def create_invoices_for_subscription(subscription):
     sub_doc.save(ignore_permissions=True)
 
     return {"success": True, "created_invoices": created_invoices}
+
+
+
+
+
+
+"""
+Bulk generation of sales invoice for CLI Subscription Documents
+"""
+
+@frappe.whitelist()
+def generate_invoices(subscription):
+    try:
+        result = create_invoices_for_subscription(subscription)
+        return result
+    except Exception as e:
+        frappe.log_error(title="Invoice Generation Failed", message=frappe.get_traceback())
+        return {"success": False, "error": str(e)}
 
 
 

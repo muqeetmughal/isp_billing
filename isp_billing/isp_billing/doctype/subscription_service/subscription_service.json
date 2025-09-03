@@ -34,7 +34,8 @@
   "pax8_invoice_item_id",
   "plan_options_section",
   "voice_device",
-  "direction"
+  "direction",
+  "phone"
  ],
  "fields": [
   {
@@ -203,13 +204,18 @@
    "fieldname": "service_start_date",
    "fieldtype": "Date",
    "label": "Service Start Date"
+  },
+  {
+   "fieldname": "phone",
+   "fieldtype": "Small Text",
+   "label": "Phone"
   }
  ],
  "grid_page_length": 100,
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2025-09-01 15:38:27.938968",
+ "modified": "2025-09-03 11:58:04.031305",
  "modified_by": "Administrator",
  "module": "Isp Billing",
  "name": "Subscription Service",

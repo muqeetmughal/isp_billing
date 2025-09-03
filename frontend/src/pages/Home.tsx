@@ -18,6 +18,8 @@ const Home = () => {
   const [loading, setLoading] = useState(true);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [showPassword, setShowPassword] = useState(false);
+  const [plansCount, setPlansCount] = useState<number>(0);
+
 
   useEffect(() => {
     if (!currentUser) return;
@@ -37,16 +39,40 @@ const Home = () => {
     };
 
     const fetchSubscriptions = async () => {
-      try {
-        const response = await axios.get(
-          "/api/method/isp_billing.api.subscription.get_subscription_details",
-          { params: { email: currentUser } }
-        );
-        setSubscriptions(response.data.message || []);
-      } catch (error) {
-        console.error("Error fetching subscriptions:", error);
-      }
-    };
+  try {
+    setLoading(true);
+
+    // Step 1: Get customer name by email
+    const customerRes = await axios.get(
+      "/api/method/isp_billing.api.customer.get_customer_name_by_email",
+      { params: { email: currentUser } }
+    );
+    const customerName = customerRes.data.message;
+
+    // Step 2: Get subscription details for that customer
+    const response = await axios.get(
+      "/api/method/isp_billing.api.subscription.get_new_subscription_details",
+      { params: { subscriber: customerName } }
+    );
+
+    const subsData = response.data.message || [];
+
+    // Step 3: Count total number of plans
+    const totalPlans = subsData.reduce(
+      (count: number, sub: any) => count + (sub.plans?.length || 0),
+      0
+    );
+
+    setSubscriptions(subsData);
+    setPlansCount(totalPlans); // <- new state for plan count
+  } catch (error) {
+    console.error("Error fetching subscriptions:", error);
+  } finally {
+    setLoading(false);
+  }
+};
+
+
 
     const fetchIssues = async () => {
       try {
@@ -105,11 +131,11 @@ const Home = () => {
         <div className="backdrop-blur-md bg-white/30 border border-white/40 rounded-2xl shadow-2xl p-10 w-full animate-fade-in">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <CounterCard
-              title="Subscriptions"
+              title="Subscription Plans"
               subtitle="View and manage your active plans."
               color="text-indigo-600"
               icon="💳"
-              target={subscriptions.length}
+              target={plansCount}
             />
             <CounterCard
               title="Support Tickets"

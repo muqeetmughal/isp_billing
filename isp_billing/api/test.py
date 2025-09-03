@@ -68,59 +68,9 @@ def get_customer():
     return customers
 
 import json
-# def get_customer():
-#     Customer = DocType("Customer")
-    
-#     customers = (
-#         frappe.qb.from_(Customer)
-#             .select(
-#                 Customer.name,
-#                 Customer.customer_name,
-#                 Customer.custom_geo_data
-#             )
-#             .run(as_dict=True)
-#     )
-
-#     # Parse geo_data and extract coordinates
-#     for geo_data in customers:
-#         if geo_data.get("custom_geo_data"):
-#             try:
-#                 geo_json = json.loads(geo_data["custom_geo_data"])
-#                 coordinates = (
-#                     geo_json["features"][0]["geometry"]["coordinates"]
-#                     if geo_json.get("features")
-#                     else None
-#                 )
-#                 geo_data["coordinates"] = coordinates
-#             except Exception:
-#                 geo_data["coordinates"] = None
-#         else:
-#             geo_data["coordinates"] = None
-
-#     return customers
 
 
 
-
-# Create Payment Request for a Sales Invoice
-
-
-def create_gocardless_mandate():
-       
-    doc = frappe.get_doc({
-        "doctype": "GoCardless Mandate",
-        "customer": "Suleman Saeed",
-        "mandate": "Suleman Saeed",
-        "gocardless_customer": "Suleman Saeed",
-    })
-    doc.insert(ignore_permissions=True)
-    frappe.db.commit()
-    frappe.local.response.http_status_code = 201
-    return {
-        "msg": "GoCardless Mandate Created Successfully",
-        "mandate": doc.name,
-        "success": True
-    }
 
 
 
@@ -134,7 +84,7 @@ def create_gocardless_mandate():
 
 def change_status():
 
-    doc = frappe.db.set_value("Sales Invoice", "ACC-SINV-2025-00069", "custom_gocardless_payment_status", "Paid")
+    doc = frappe.db.set_value("Sales Invoice", "ACC-SINV-2025-00063", "custom_gocardless_payment_status", "Paid")
 
     return{
         "success": True,

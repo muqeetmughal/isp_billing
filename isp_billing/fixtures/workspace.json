@@ -9,6 +9,13 @@
     "parenttype": "Workspace"
    },
    {
+    "chart_name": "CLI Subscription",
+    "label": "CLI Subscriber",
+    "parent": "CLI SECURE",
+    "parentfield": "charts",
+    "parenttype": "Workspace"
+   },
+   {
     "chart_name": "issue",
     "label": "Support Tickets",
     "parent": "CLI SECURE",
@@ -21,16 +28,9 @@
     "parent": "CLI SECURE",
     "parentfield": "charts",
     "parenttype": "Workspace"
-   },
-   {
-    "chart_name": "Active Subscriber",
-    "label": "Active Subscriber",
-    "parent": "CLI SECURE",
-    "parentfield": "charts",
-    "parenttype": "Workspace"
    }
   ],
-  "content": "[{\"id\":\"yUQXeafBte\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">CLI SECURE</span>\",\"col\":12}},{\"id\":\"T6X74_1Nz0\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Customer\",\"col\":3}},{\"id\":\"2zD-Zz4eve\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Invoices\",\"col\":3}},{\"id\":\"VhF4gfAolY\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Support Tickets\",\"col\":3}},{\"id\":\"_OGu-sqhiY\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Active Subscriptions\",\"col\":3}},{\"id\":\"0484AcXdD-\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Total Plans\",\"col\":7}},{\"id\":\"WIqhR6p4Jw\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Invoice\",\"col\":6}},{\"id\":\"5ZC6lhS6H3\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Active Subscriber\",\"col\":6}},{\"id\":\"TylNmiFYxn\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Support Tickets\",\"col\":6}},{\"id\":\"nYV1bUek_3\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Customers\",\"col\":6}}]",
+  "content": "[{\"id\":\"yUQXeafBte\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">CLI SECURE</span>\",\"col\":12}},{\"id\":\"T6X74_1Nz0\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Customer\",\"col\":3}},{\"id\":\"2zD-Zz4eve\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Invoices\",\"col\":3}},{\"id\":\"VhF4gfAolY\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Support Tickets\",\"col\":3}},{\"id\":\"_OGu-sqhiY\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Active Subscriptions\",\"col\":3}},{\"id\":\"0484AcXdD-\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"Total Plans\",\"col\":7}},{\"id\":\"WIqhR6p4Jw\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Invoice\",\"col\":6}},{\"id\":\"TylNmiFYxn\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Support Tickets\",\"col\":6}},{\"id\":\"nYV1bUek_3\",\"type\":\"chart\",\"data\":{\"chart_name\":\"Customers\",\"col\":6}},{\"id\":\"MUp6EUsw2e\",\"type\":\"chart\",\"data\":{\"chart_name\":\"CLI Subscriber\",\"col\":6}}]",
   "custom_blocks": [],
   "docstatus": 0,
   "doctype": "Workspace",
@@ -41,7 +41,7 @@
   "is_hidden": 0,
   "label": "CLI SECURE",
   "links": [],
-  "modified": "2025-08-22 22:48:31.506377",
+  "modified": "2025-09-02 20:10:47.512578",
   "module": "Isp Billing",
   "name": "CLI SECURE",
   "number_cards": [],
@@ -76,13 +76,13 @@
     "icon": null,
     "kanban_board": null,
     "label": "Active Subscriptions",
-    "link_to": "Subscription",
+    "link_to": "CLI Subscription",
     "parent": "CLI SECURE",
     "parentfield": "shortcuts",
     "parenttype": "Workspace",
     "report_ref_doctype": null,
     "restrict_to_domain": null,
-    "stats_filter": "[[\"Subscription\",\"status\",\"=\",\"Active\",false]]",
+    "stats_filter": "[]",
     "type": "DocType",
     "url": null
    },

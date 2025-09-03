@@ -149,17 +149,6 @@ def create_stripe_checkout_link(amount, customer_email, enhancement_id):
 
 
 
-def on_update(doc, method):
-    if doc.status == "Paid":
-        customer_email = frappe.db.get_value("Customer", doc.customer, "custom_email")
-        if customer_email:
-            frappe.sendmail(
-                recipients=customer_email,
-                subject="Payment Confirmation",
-                message=f"Dear {doc.customer},<br>Your payment {doc.name} has been received successfully."
-            )
-
-
 
 
 

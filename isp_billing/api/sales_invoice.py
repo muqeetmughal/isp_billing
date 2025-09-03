@@ -123,3 +123,56 @@ def create_invoices_for_all_subscriptions():
 
 
 
+
+
+
+
+@frappe.whitelist()
+def cleanup_paid_invoices():
+
+    subscriptions = cli_subscription_list()
+    if not subscriptions:
+        return {"success": False, "message": "No subscriptions found"}
+    
+    print("CLI Subscription", subscriptions)
+
+    for sub in subscriptions:
+        subscription = sub.get("name")
+        if not subscription:
+            continue
+
+
+    """Remove sales_invoice_id from subscription services if invoice is already paid"""
+    subscription = frappe.get_doc("CLI Subscription", subscription)
+    updated_rows = []
+
+    for svc in subscription.get("service") or []:
+        if not svc.sales_invoice_id:
+            continue
+
+        inv = frappe.db.get_value(
+            "Sales Invoice",
+            svc.sales_invoice_id,
+            ["status", "custom_gocardless_payment_status"],
+            as_dict=True
+        )
+
+        if not inv:
+            continue
+
+        # ✅ check conditions
+        if inv.status == "Paid" or inv.custom_gocardless_payment_status in ["paid", "paid_out", "Paid", "Paid Out", "Paid out"]:
+            frappe.db.set_value(
+                "Subscription Service",
+                svc.name,
+                "sales_invoice_id",
+                None
+            )
+            updated_rows.append(svc.sales_invoice_id)
+
+    return {
+        "success": True,
+        "cleared_invoices": updated_rows
+    }
+
+
