@@ -8,6 +8,8 @@ import Subscription from "./pages/Subscription";
 import MainLayout from "./layouts/MainLayout";
 import Home from "./pages/Home";
 import SupportTicket from "./pages/SupportTicket";
+import StripeCheckout from "./pages/Stripe";
+
 
 function Client() {
   return (
@@ -24,6 +26,7 @@ function Client() {
               <Route path="/invoices" element={<Invoices />} />
               <Route path="/subscription" element={<Subscription />} />
               <Route path="/support_tickets" element={<SupportTicket />} />
+              <Route path="/stripe" element={<StripeCheckout />} />
               <Route path="*" element={<>404 Not Found</>} />
             </Route>
           </Route>
@@ -34,3 +37,6 @@ function Client() {
 }
 
 export default Client;
+
+
+//app.html or app.py

@@ -12,6 +12,134 @@ def get_stripe_client():
     stripe.api_key = settings.stripe_secret_key
     return stripe
 
+#get access token 
+def get_stripe_secret_key():
+    secret_ket = frappe.get_single("Isp Billing Setting")
+    return secret_ket
+
+
+"""
+this code is used to get payment from customer automatically if customer is already register
+"""
+def stripe_direct_debit(amount, payment_method, customer_id):
+
+    secret_key = get_stripe_secret_key()
+    stripe.api_key = secret_key.get("stripe_secret_key")
+
+    payment_intent = stripe.PaymentIntent.create(
+        amount = amount,
+        currency = "usd",
+        # customer = "cus_SzBuKUZOIP8X2h",
+        customer = customer_id,
+        # payment_method = "pm_1S3EWxQN9Rybq9acWfpDrqSF",
+        payment_method = payment_method,
+        off_session=True,
+        confirm=True,
+        automatic_payment_methods={
+            "enabled": True,
+            "allow_redirects": "never",  # 🚀 important fix
+        },
+    )
+
+    return("Payment Status:", payment_intent.status)
+
+
+
+
+"""
+create customer and payment_method for stripe
+"""
+def stripe_customer():
+
+    secret_ket = get_stripe_secret_key()
+    stripe.api_key = secret_ket.get("stripe_secret_key")
+
+    customer_id = "cus_SzBuKUZOIP8X2h"
+
+    payment_method = stripe.PaymentMethod.create(
+        type="card",
+        card={
+            "number": "4242424242424242",
+            "exp_month": 12,
+            "exp_year": 2030,
+            "cvc": "123",
+        }
+    )
+
+    print("Payment Method Created:", payment_method.id)
+
+    stripe.PaymentMethod.attach(
+        payment_method.id,
+        customer=customer_id
+    )
+
+    stripe.Customer.modify(
+        customer_id,
+        invoice_settings={
+            "default_payment_method": payment_method.id
+        }
+    )
+
+    print("✅ Payment method attached & set as default")
+
+    return ("Payment Method Created Successfully")
+
+
+
+
+# app_name/api/stripe_integration.py
+
+import frappe
+import stripe
+
+
+
+
+@frappe.whitelist(allow_guest=True)
+def create_customer_and_payment_method(email, name, payment_method_id):
+    """
+    Creates a Stripe Customer, attaches PaymentMethod, sets it as default.
+    """
+
+    secret_key = get_stripe_secret_key()
+
+    stripe.api_key = secret_key.get("stripe_secret_key")
+    try:
+        # 1. Create Customer in Stripe
+        customer = stripe.Customer.create(
+            email=email,
+            name=name,
+        )
+
+        # 2. Attach the payment method
+        stripe.PaymentMethod.attach(
+            payment_method_id,
+            customer=customer.id
+        )
+
+        # 3. Set default payment method
+        stripe.Customer.modify(
+            customer.id,
+            invoice_settings={
+                "default_payment_method": payment_method_id
+            }
+        )
+
+        return {
+            "status": "success",
+            "customer_id": customer.id,
+            "payment_method_id": payment_method_id
+        }
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Stripe Create Customer + PaymentMethod Error")
+        return {"status": "error", "message": str(e)}
+
+
+
+
+
+
 
 @frappe.whitelist(allow_guest=True)
 def get_stripe_publish_key():
