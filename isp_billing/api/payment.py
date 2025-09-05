@@ -14,8 +14,14 @@ def get_stripe_client():
 
 #get access token 
 def get_stripe_secret_key():
-    secret_ket = frappe.get_single("Isp Billing Setting")
-    return secret_ket
+    secret_key = frappe.get_single("Isp Billing Setting")
+    return secret_key
+
+
+
+def get_stripe_pubish_key():
+    publish_key = frappe.get_single("Isp Billing Setting")
+    return publish_key
 
 
 """
@@ -98,12 +104,13 @@ import stripe
 @frappe.whitelist(allow_guest=True)
 def create_customer_and_payment_method(email, name, payment_method_id):
     """
-    Creates a Stripe Customer, attaches PaymentMethod, sets it as default.
+    Creates a Stripe Customer, attaches PaymentMethod, sets it as default,
+    and updates the corresponding Frappe Customer record.
     """
 
     secret_key = get_stripe_secret_key()
-
     stripe.api_key = secret_key.get("stripe_secret_key")
+
     try:
         # 1. Create Customer in Stripe
         customer = stripe.Customer.create(
@@ -125,6 +132,18 @@ def create_customer_and_payment_method(email, name, payment_method_id):
             }
         )
 
+        # 4. Update Frappe Customer (where custom_email = email)
+        frappe.db.set_value(
+            "Customer",
+            {"custom_email": email},  # filter condition
+            {
+                "custom_stripe_customer_id": customer.id,
+                "custom_stripe_payment_method_id": payment_method_id,
+            },
+        )
+
+        frappe.db.commit()  # ensure the update is saved
+
         return {
             "status": "success",
             "customer_id": customer.id,
@@ -134,7 +153,6 @@ def create_customer_and_payment_method(email, name, payment_method_id):
     except Exception as e:
         frappe.log_error(frappe.get_traceback(), "Stripe Create Customer + PaymentMethod Error")
         return {"status": "error", "message": str(e)}
-
 
 
 
