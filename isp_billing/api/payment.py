@@ -105,6 +105,7 @@ def stripe_webhook():
     stripe.api_key = secret_key.get("stripe_secret_key")
 
     # Your webhook signing secret stored in a DocType
+    #remove the webhook secret from the code
     # endpoint_secret = frappe.db.get_single_value("Stripe Settings", "webhook_secret")
     endpoint_secret = ""
 
