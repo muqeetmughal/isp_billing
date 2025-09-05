@@ -1,5 +1,6 @@
 import frappe
 import stripe
+import json
 from frappe import _
 
 def get_stripe_client():
@@ -27,80 +28,151 @@ def get_stripe_pubish_key():
 """
 this code is used to get payment from customer automatically if customer is already register
 """
-def stripe_direct_debit(amount, payment_method, customer_id):
+
+@frappe.whitelist(allow_guest=True)
+def stripe_direct_debit_for_sales_invoice(sales_invoice_name):
+    """
+    Creates a Stripe PaymentIntent for a Sales Invoice using the linked
+    Customer's Stripe details (customer_id + payment_method_id).
+    """
 
     secret_key = get_stripe_secret_key()
     stripe.api_key = secret_key.get("stripe_secret_key")
 
-    payment_intent = stripe.PaymentIntent.create(
-        amount = amount,
-        currency = "usd",
-        # customer = "cus_SzBuKUZOIP8X2h",
-        customer = customer_id,
-        # payment_method = "pm_1S3EWxQN9Rybq9acWfpDrqSF",
-        payment_method = payment_method,
-        off_session=True,
-        confirm=True,
-        automatic_payment_methods={
-            "enabled": True,
-            "allow_redirects": "never",  # 🚀 important fix
-        },
-    )
+    try:
+        # 1. Get Sales Invoice
+        si = frappe.get_doc("Sales Invoice", sales_invoice_name)
 
-    return("Payment Status:", payment_intent.status)
+        # 2. Get linked Customer
+        customer = frappe.get_doc("Customer", si.customer)
+
+        # 3. Fetch Stripe IDs from Customer custom fields
+        customer_id = customer.custom_stripe_customer_id
+        payment_method = customer.custom_stripe_payment_method_id
+
+        if not customer_id or not payment_method:
+            frappe.throw("Stripe Customer ID or Payment Method ID is missing for this Customer.")
+
+        # 4. Amount from Sales Invoice (convert to cents for Stripe)
+        amount = int(si.outstanding_amount * 100)  # Stripe expects amount in cents
+
+        # 5. Create PaymentIntent
+        payment_intent = stripe.PaymentIntent.create(
+            amount=amount,
+            currency="usd",
+            customer=customer_id,
+            payment_method=payment_method,
+            off_session=True,
+            confirm=True,
+            automatic_payment_methods={
+                "enabled": True,
+                "allow_redirects": "never",
+            },
+        )
+
+        # ✅ 6. Update Sales Invoice with PaymentIntent details
+        si.db_set("custom_stripe_payment_id", payment_intent.id)
+        si.db_set("custom_stripe_payment_status", payment_intent.status)
+
+        return {
+            "status": "success",
+            "payment_status": payment_intent.status,
+            "payment_intent_id": payment_intent.id
+        }
+
+    except Exception as e:
+        frappe.log_error(frappe.get_traceback(), "Stripe Direct Debit for Sales Invoice Error")
+        return {"status": "error", "message": str(e)}
+
+
 
 
 
 
 """
-create customer and payment_method for stripe
+This code is used in the stripe webhook to update the status of specific sales_invoice field
+custom_stirpe_payment_status
 """
-def stripe_customer():
+@frappe.whitelist(allow_guest=True)
+def stripe_webhook():
+    """
+    Stripe webhook to update Sales Invoice payment status
+    based on Stripe PaymentIntent events.
+    """
 
-    secret_ket = get_stripe_secret_key()
-    stripe.api_key = secret_ket.get("stripe_secret_key")
+    # Get Stripe settings
+    secret_key = get_stripe_secret_key()
+    stripe.api_key = secret_key.get("stripe_secret_key")
 
-    customer_id = "cus_SzBuKUZOIP8X2h"
+    # Your webhook signing secret stored in a DocType
+    # endpoint_secret = frappe.db.get_single_value("Stripe Settings", "webhook_secret")
+    endpoint_secret = ""
 
-    payment_method = stripe.PaymentMethod.create(
-        type="card",
-        card={
-            "number": "4242424242424242",
-            "exp_month": 12,
-            "exp_year": 2030,
-            "cvc": "123",
-        }
-    )
+    payload = frappe.request.data
+    sig_header = frappe.get_request_header("Stripe-Signature")
 
-    print("Payment Method Created:", payment_method.id)
+    event = None
 
-    stripe.PaymentMethod.attach(
-        payment_method.id,
-        customer=customer_id
-    )
+    # Verify webhook
+    try:
+        if endpoint_secret:
+            event = stripe.Webhook.construct_event(
+                payload, sig_header, endpoint_secret
+            )
+        else:
+            event = json.loads(payload)
+    except ValueError as e:
+        frappe.log_error(str(e), "⚠️ Webhook JSON Parse Error")
+        frappe.local.response["http_status_code"] = 400
+        return "Invalid payload"
+    except stripe.error.SignatureVerificationError as e:
+        frappe.log_error(str(e), "⚠️ Webhook Signature Verification Failed")
+        frappe.local.response["http_status_code"] = 400
+        return "Invalid signature"
 
-    stripe.Customer.modify(
-        customer_id,
-        invoice_settings={
-            "default_payment_method": payment_method.id
-        }
-    )
+    # --- Handle events ---
+    if event and event["type"] in [
+        "payment_intent.succeeded",
+        "payment_intent.processing",
+        "payment_intent.payment_failed"
+    ]:
+        payment_intent = event["data"]["object"]
+        payment_intent_id = payment_intent.get("id")
+        status = payment_intent.get("status")
 
-    print("✅ Payment method attached & set as default")
+        # Find Sales Invoice where custom_stripe_payment_id = payment_intent.id
+        sales_invoice = frappe.db.get_value(
+            "Sales Invoice",
+            {"custom_stripe_payment_id": payment_intent_id},
+            "name"
+        )
 
-    return ("Payment Method Created Successfully")
+        if sales_invoice:
+            frappe.db.set_value(
+                "Sales Invoice",
+                sales_invoice,
+                "custom_stripe_payment_status",
+                status
+            )
+            frappe.db.commit()
+            frappe.logger().info(f"✅ Updated {sales_invoice} with Stripe status: {status}")
+        else:
+            frappe.logger().warning(
+                f"⚠️ No Sales Invoice found for PaymentIntent {payment_intent_id}"
+            )
+
+    else:
+        frappe.logger().info(f"Unhandled event type {event['type']}")
+
+    return "Webhook processed"
 
 
 
 
-# app_name/api/stripe_integration.py
 
-import frappe
-import stripe
-
-
-
-
+""""
+This code is used to create customer and paymet_method in the stripe
+"""
 @frappe.whitelist(allow_guest=True)
 def create_customer_and_payment_method(email, name, payment_method_id):
     """
