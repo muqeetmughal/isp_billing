@@ -64,7 +64,7 @@ const SaveCardForm: React.FC<SaveCardFormProps> = () => {
     // 2. Send PaymentMethod to backend
     try {
       const res = await fetch(
-        "/api/method/isp_billing.api.payment.create_customer_and_payment_method",
+        "/api/method/isp_billing.api.stripe.create_customer_and_payment_method",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
