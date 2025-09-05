@@ -284,7 +284,9 @@ def complete_redirect_flow(redirect_flow_id, session_token):
 
 
 
-
+"""
+this code is used in gocardless webhook
+"""
 
 @frappe.whitelist(allow_guest=True)
 def gocardless_webhook():
@@ -412,8 +414,10 @@ def gocardless_webhook():
                                     "posting_date": frappe.utils.nowdate(),
                                     "party_type": "Customer",
                                     "party": si.customer,
-                                    "paid_from": frappe.get_value("Company", si.company, "1310 - Debtors - CLI SECURE"),
-                                    "paid_to": frappe.get_value("Company", si.company, "GoCardless-DIRECT DEBIT - GoCardless - CLI SECURE"),
+                                    # "paid_from": frappe.get_value("Company", si.company, "1310 - Debtors - CLI SECURE"),
+                                    "paid_from": frappe.get_value("Company", si.company, "Debtors - CS"),
+                                    # "paid_to": frappe.get_value("Company", si.company, "GoCardless-DIRECT DEBIT - GoCardless - CLI SECURE"),
+                                    "paid_to": frappe.get_value("Company", si.company, "Cash - CS"),
                                     "paid_amount": si.outstanding_amount,
                                     "received_amount": si.outstanding_amount,
                                     "reference_no": payment_id,
@@ -555,76 +559,9 @@ def process_new_mandate(doc, method):
 
 
 
-
-
-
 """
-when new plan is added in the subscription if its status is active then it will add this in the 
-gocardless mandate otherwise do nothing 
+this code is used to create invoice for subscription_plan in cli subscription
 """
-
-def handle_cli_subscription(doc, method):
-    """Handle CLI Subscription logic on save"""
-
-    # Get mandate_id from linked Customer
-    mandate_id = frappe.db.get_value("Customer", doc.customer, "custom_gocardless_mandate_id")
-    if not mandate_id:
-        frappe.throw("Customer does not have a GoCardless mandate ID")
-
-    # Connect to GoCardless
-
-    access_token = get_gocardless_access_token()
-    token = access_token.get("access_token")
-
-    access_token = token
-    client = gocardless_pro.Client(access_token=access_token, environment="sandbox")
-
-    # Fetch active subscriptions for the mandate
-    existing_subs = client.subscriptions.list(params={"mandate": mandate_id})
-    active_plans = {
-        sub.metadata.get("plan"): sub.status
-        for sub in existing_subs.records
-        if sub.status == "active"
-    }
-
-    # Iterate over services in the child table
-    for service in doc.service:
-        plan = service.plan.strip() if service.plan else None
-        status = (service.status or "").lower()
-        start_date = service.billing_start_date
-        month = service.no_of_month
-
-        # ✅ Condition 1: must be "active"
-        if status != "active":
-            frappe.msgprint(f"Skipping {plan} (not Active)")
-            continue
-
-        # ✅ Condition 2: must not already exist in GoCardless active subs
-        if plan in active_plans:
-            frappe.msgprint(f"Skipping {plan} (already subscribed in GoCardless)")
-            continue
-
-        # Otherwise → create a new subscription
-        subscription_params = {
-            "amount": int(service.price * 100),  # pence
-            "currency": "GBP",
-            "name": plan,
-            "interval_unit": "monthly",  # could be dynamic
-            "links": {"mandate": mandate_id},
-            "metadata": {"plan": plan},
-            "count": month,
-            "start_date": start_date
-        }
-
-        new_sub = client.subscriptions.create(params=subscription_params)
-        frappe.msgprint(f"✅ Created new subscription {new_sub.id} for plan {plan}")
-
-
-
-
-
-
-
 @frappe.whitelist()
 def create_invoices_for_subscription(subscription):
 
