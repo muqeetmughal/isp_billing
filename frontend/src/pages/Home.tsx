@@ -201,24 +201,8 @@ const Home = () => {
                     <span>{customerDetails.custom_billing_email}</span>
                   </div>
                   <div className="flex">
-                    <span className="font-semibold w-40">Partner:</span>
-                    <span>{customerDetails.custom_partner}</span>
-                  </div>
-                  <div className="flex">
                     <span className="font-semibold w-40">Billing Type:</span>
                     <span>{customerDetails.custom_billing_type}</span>
-                  </div>
-                  <div className="flex">
-                    <span className="font-semibold w-40">Company:</span>
-                    <span>{customerDetails.custom_company}</span>
-                  </div>
-                  <div className="flex">
-                    <span className="font-semibold w-40">Date of Birth:</span>
-                    <span>{customerDetails.custom_date_of_birth}</span>
-                  </div>
-                  <div className="flex">
-                    <span className="font-semibold w-40">Identification:</span>
-                    <span>{customerDetails.custom_identification}</span>
                   </div>
                   <div className="flex">
                     <span className="font-semibold w-40">Location:</span>
@@ -235,10 +219,6 @@ const Home = () => {
                   <div className="flex">
                     <span className="font-semibold w-40">Zip Code:</span>
                     <span>{customerDetails.custom_zip_code}</span>
-                  </div>
-                  <div className="flex">
-                    <span className="font-semibold w-40">Date Added:</span>
-                    <span>{customerDetails.custom_date_added}</span>
                   </div>
                   <div className="flex">
                     <span className="font-semibold w-40">Company ID:</span>

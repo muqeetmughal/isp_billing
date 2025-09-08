@@ -395,45 +395,62 @@ def gocardless_webhook():
                         # ✅ 2) If status is "paid_out" → Create Payment Entry
                         if payment_details.get("status") == "paid_out":
                             si = frappe.get_doc("Sales Invoice", si_name)
+                            # print("psyment intent status", payment_intent.status)
+                            payment_confirmation = frappe.get_doc("Email Template", "Payment Confirmation")
 
-                            # Avoid duplicate Payment Entries
-                            existing_pe = frappe.db.exists(
-                                "Payment Entry",
-                                {
-                                    "reference_no": payment_id,
-                                    "party_type": "Customer",
-                                    "party": si.customer
-                                }
+                            context = {
+                                "customer": customer.name,
+                                "amount": si.outstanding_amount,
+                                "invoice_number": si.name
+                            }
+
+                            subject = frappe.render_template(payment_confirmation.subject, context)
+                            message = frappe.render_template(payment_confirmation.response, context)
+
+                            frappe.sendmail(
+                                recipients=customer.custom_email,
+                                subject=subject,
+                                message=message
                             )
 
-                            if not existing_pe:
-                                pe = frappe.get_doc({
-                                    "doctype": "Payment Entry",
-                                    "payment_type": "Receive",
-                                    "company": si.company,
-                                    "posting_date": frappe.utils.nowdate(),
-                                    "party_type": "Customer",
-                                    "party": si.customer,
-                                    # "paid_from": frappe.get_value("Company", si.company, "1310 - Debtors - CLI SECURE"),
-                                    "paid_from": frappe.get_value("Company", si.company, "Debtors - CS"),
-                                    # "paid_to": frappe.get_value("Company", si.company, "GoCardless-DIRECT DEBIT - GoCardless - CLI SECURE"),
-                                    "paid_to": frappe.get_value("Company", si.company, "Cash - CS"),
-                                    "paid_amount": si.outstanding_amount,
-                                    "received_amount": si.outstanding_amount,
-                                    "reference_no": payment_id,
-                                    "reference_date": frappe.utils.nowdate(),
-                                    "references": [{
-                                        "reference_doctype": "Sales Invoice",
-                                        "reference_name": si.name,
-                                        "allocated_amount": si.outstanding_amount
-                                    }]
-                                })
-                                pe.insert(ignore_permissions=True)
-                                pe.submit()
+                            # Avoid duplicate Payment Entries
+                            # existing_pe = frappe.db.exists(
+                            #     "Payment Entry",
+                            #     {
+                            #         "reference_no": payment_id,
+                            #         "party_type": "Customer",
+                            #         "party": si.customer
+                            #     }
+                            # )
 
-                                frappe.logger().info(f"✅ Payment Entry {pe.name} created for Sales Invoice {si.name}")
-                            else:
-                                frappe.logger().info(f"ℹ️ Payment Entry already exists for Sales Invoice {si_name} and Payment {payment_id}")
+                            # if not existing_pe:
+                            #     pe = frappe.get_doc({
+                            #         "doctype": "Payment Entry",
+                            #         "payment_type": "Receive",
+                            #         "company": si.company,
+                            #         "posting_date": frappe.utils.nowdate(),
+                            #         "party_type": "Customer",
+                            #         "party": si.customer,
+                            #         # "paid_from": frappe.get_value("Company", si.company, "1310 - Debtors - CLI SECURE"),
+                            #         "paid_from": frappe.get_value("Company", si.company, "Debtors - CS"),
+                            #         # "paid_to": frappe.get_value("Company", si.company, "GoCardless-DIRECT DEBIT - GoCardless - CLI SECURE"),
+                            #         "paid_to": frappe.get_value("Company", si.company, "Cash - CS"),
+                            #         "paid_amount": si.outstanding_amount,
+                            #         "received_amount": si.outstanding_amount,
+                            #         "reference_no": payment_id,
+                            #         "reference_date": frappe.utils.nowdate(),
+                            #         "references": [{
+                            #             "reference_doctype": "Sales Invoice",
+                            #             "reference_name": si.name,
+                            #             "allocated_amount": si.outstanding_amount
+                            #         }]
+                            #     })
+                            #     pe.insert(ignore_permissions=True)
+                            #     pe.submit()
+
+                            #     frappe.logger().info(f"✅ Payment Entry {pe.name} created for Sales Invoice {si.name}")
+                            # else:
+                            #     frappe.logger().info(f"ℹ️ Payment Entry already exists for Sales Invoice {si_name} and Payment {payment_id}")
 
                 except Exception as e:
                     frappe.log_error(frappe.get_traceback(), f"Error handling Payment {payment_id}")

@@ -182,3 +182,20 @@ def send_welcome_email(doc, password):
         message=message,
         delayed=False
     )
+
+
+
+
+
+
+
+
+
+"""
+I create the new doctype "CLI Subscription" because default doctype have some limitation.
+In Cli Subscription i add the custom button that create the the sales invoice for one document 
+and also add the custom button in the list view for bulk creation of sales invoice for each plan in the 
+cli subscription.
+Also add the custom button in the sales invoice for direct debit for gocardless and stripe and same for 
+the list view for bulk direct debit of multiple sales invoices 
+"""

@@ -74,6 +74,27 @@ def stripe_direct_debit_for_sales_invoice(sales_invoice_name):
         si.db_set("custom_stripe_payment_id", payment_intent.id)
         si.db_set("custom_stripe_payment_status", payment_intent.status)
 
+        si.reload()
+
+        if payment_intent.status == "succeeded":
+            print("psyment intent status", payment_intent.status)
+            payment_confirmation = frappe.get_doc("Email Template", "Payment Confirmation")
+
+            context = {
+                "customer": customer.name,
+                "amount": amount,
+                "invoice_number": sales_invoice_name
+            }
+
+            subject = frappe.render_template(payment_confirmation.subject, context)
+            message = frappe.render_template(payment_confirmation.response, context)
+
+            frappe.sendmail(
+                recipients=customer.custom_email,
+                subject=subject,
+                message=message
+            )
+
         return {
             "status": "success",
             "payment_status": payment_intent.status,
