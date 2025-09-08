@@ -60,65 +60,123 @@ const Subscription = () => {
             </div>
           </div>
         ) : (
-          <>
-            {subscriptions.length > 0 ? (
-              <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
-                {subscriptions.map((sub) =>
-                  sub.plans.map((plan, index) => (
-                    <div
-                      key={`${sub.name}-${index}`}
-                      className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition"
-                    >
-                      {/* Plan Header */}
-                      <div className="flex justify-between items-center mb-4">
-                        <h3 className="text-xl font-semibold text-gray-900">
-                          {plan.plan}
-                        </h3>
-                        <span
-                          className={`px-3 py-1 text-xs rounded-full font-medium ${
-                            plan.status === "Active"
-                              ? "bg-green-100 text-green-800"
-                              : "bg-red-100 text-red-800"
-                          }`}
-                        >
-                          {plan.status}
-                        </span>
-                      </div>
+          // <>
+          //   {subscriptions.length > 0 ? (
+          //     <div className="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          //       {subscriptions.map((sub) =>
+          //         sub.plans.map((plan, index) => (
+          //           <div
+          //             key={`${sub.name}-${index}`}
+          //             className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition"
+          //           >
+          //             {/* Plan Header */}
+          //             <div className="flex justify-between items-center mb-4">
+          //               <h3 className="text-xl font-semibold text-gray-900">
+          //                 {plan.plan}
+          //               </h3>
+          //               <span
+          //                 className={`px-3 py-1 text-xs rounded-full font-medium ${
+          //                   plan.status === "Active"
+          //                     ? "bg-green-100 text-green-800"
+          //                     : "bg-red-100 text-red-800"
+          //                 }`}
+          //               >
+          //                 {plan.status}
+          //               </span>
+          //             </div>
 
-                      {/* Basic Details */}
-                      <p className="text-sm text-gray-700">
-                        <span className="font-medium">Customer:</span>{" "}
-                        {sub.customer}
-                      </p>
-                      <p className="text-sm text-gray-700">
-                        <span className="font-medium">Quantity:</span>{" "}
-                        {plan.quantity}
-                      </p>
-                      <p className="text-sm text-gray-700">
-                        <span className="font-medium">Price:</span> ${plan.price}
-                      </p>
+          //             {/* Basic Details */}
+          //             <p className="text-sm text-gray-700">
+          //               <span className="font-medium">Customer:</span>{" "}
+          //               {sub.customer}
+          //             </p>
+          //             <p className="text-sm text-gray-700">
+          //               <span className="font-medium">Quantity:</span>{" "}
+          //               {plan.quantity}
+          //             </p>
+          //             <p className="text-sm text-gray-700">
+          //               <span className="font-medium">Price:</span> ${plan.price}
+          //             </p>
 
-                      {/* Button */}
-                      <div className="mt-4">
-                        <button
-                          onClick={() => setSelectedPlan(plan)}
-                          className="w-full bg-[#7d4fff] text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-[#6c3fee] transition"
-                        >
-                          View Details
-                        </button>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            ) : (
-              <div className="bg-white rounded-2xl shadow-lg p-8 text-center border-2 border-dashed border-gray-200">
-                <h3 className="text-lg font-medium text-gray-900 mb-2">
-                  No Active Subscriptions
-                </h3>
-                <p className="text-gray-500">No plans found.</p>
-              </div>
-            )}
+          //             {/* Button */}
+          //             <div className="mt-4">
+          //               <button
+          //                 onClick={() => setSelectedPlan(plan)}
+          //                 className="w-full bg-[#7d4fff] text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-[#6c3fee] transition"
+          //               >
+          //                 View Details
+          //               </button>
+          //             </div>
+          //           </div>
+          //         ))
+          //       )}
+          //     </div>
+          //   ) : (
+          //     <div className="bg-white rounded-2xl shadow-lg p-8 text-center border-2 border-dashed border-gray-200">
+          //       <h3 className="text-lg font-medium text-gray-900 mb-2">
+          //         No Active Subscriptions
+          //       </h3>
+          //       <p className="text-gray-500">No plans found.</p>
+          //     </div>
+          //   )}
+          // </>
+
+          <>  
+          {subscriptions.length > 0 ? (
+  <div className="space-y-4">
+    {subscriptions.map((sub) =>
+      sub.plans.map((plan, index) => (
+        <div
+          key={`${sub.name}-${index}`}
+          className="flex justify-between items-center bg-white rounded-lg shadow p-4 border border-gray-100 hover:shadow-md transition"
+        >
+          {/* Left side info */}
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">
+              {plan.plan}
+            </h3>
+            <p className="text-sm text-gray-700">
+              <span className="font-medium">Customer:</span> {sub.customer}
+            </p>
+            <p className="text-sm text-gray-700">
+              <span className="font-medium">Quantity:</span> {plan.quantity}
+            </p>
+            <p className="text-sm text-gray-700">
+              <span className="font-medium">Price:</span> ${plan.price}
+            </p>
+          </div>
+
+          {/* Right side status + button */}
+          <div className="flex flex-col items-end space-y-2">
+            <span
+              className={`px-3 py-1 text-xs rounded-full font-medium ${
+                plan.status === "Active"
+                  ? "bg-green-100 text-green-800"
+                  : "bg-red-100 text-red-800"
+              }`}
+            >
+              {plan.status}
+            </span>
+            <button
+              onClick={() => setSelectedPlan(plan)}
+              className="bg-[#7d4fff] text-white text-sm font-medium px-4 py-2 rounded-lg hover:bg-[#6c3fee] transition"
+            >
+              View Details
+            </button>
+          </div>
+        </div>
+      ))
+    )}
+  </div>
+) : (
+  <div className="bg-white rounded-2xl shadow-lg p-8 text-center border-2 border-dashed border-gray-200">
+    <h3 className="text-lg font-medium text-gray-900 mb-2">
+      No Active Subscriptions
+    </h3>
+    <p className="text-gray-500">No plans found.</p>
+  </div>
+)}
+
           </>
         )}
 
