@@ -16,7 +16,9 @@
   "gocardless_credentials_section",
   "access_token",
   "webhook_secret",
-  "invite_customer_link"
+  "invite_customer_link",
+  "docuseal_credentials_section",
+  "docuseal_api_token"
  ],
  "fields": [
   {
@@ -79,13 +81,24 @@
    "fieldname": "invite_customer_link",
    "fieldtype": "Data",
    "label": "Invite Customer Link"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "docuseal_credentials_section",
+   "fieldtype": "Section Break",
+   "label": "Docuseal Credentials"
+  },
+  {
+   "fieldname": "docuseal_api_token",
+   "fieldtype": "Data",
+   "label": "Docuseal API Token"
   }
  ],
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "issingle": 1,
  "links": [],
- "modified": "2025-08-27 18:42:50.051749",
+ "modified": "2025-09-10 19:12:30.159219",
  "modified_by": "Administrator",
  "module": "Isp Billing",
  "name": "Isp Billing Setting",

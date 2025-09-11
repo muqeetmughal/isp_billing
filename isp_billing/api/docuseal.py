@@ -9,7 +9,7 @@ from frappe.utils.file_manager import save_file
 
 
 def get_docu_seal_token():
-    setting = frappe.get_single("Docuseal Setting")
+    setting = frappe.get_single("Isp Billing Setting")
     return setting
 
 
