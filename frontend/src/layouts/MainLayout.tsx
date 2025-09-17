@@ -139,14 +139,14 @@ const CustomerPortal = () => {
                           setShowMenu(false);
                           setShowChangePassword(true);
                         }}
-                        className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                        className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
                       >
                         Change Password
                       </button>
                       <button
                         onClick={handleLogout}
                         disabled={logoutLoading}
-                        className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50"
+                        className="block w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 disabled:opacity-50 cursor-pointer"
                       >
                         {logoutLoading ? (
                           <Loader2 className="w-4 h-4 animate-spin inline-block mr-2" />

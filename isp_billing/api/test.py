@@ -90,3 +90,15 @@ def change_status():
         "success": True,
         "data": doc
     }
+
+
+
+
+def test():
+    sai = [1,2,3]
+    sa = [4,5,6]
+    # print(sai.append(4))
+    sai.extend(sa)
+    print(sai)
+
+

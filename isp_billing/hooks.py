@@ -205,6 +205,9 @@ doc_events = {
 scheduler_events = {
     "daily": [
         "isp_billing.api.sales_invoice.create_invoices_for_all_subscriptions"
+    ],
+    "monthly": [
+        "isp_billing.api.subscription.clear_sales_invoice_ids_monthly"
     ]
 }
 

@@ -148,7 +148,7 @@ def cli_subscription_list():
 
 
 
-def get_subscription_invoice(subscriber):
+def get_subscription_invoice():
     Subscription = DocType("CLI Subscription")
     Service = DocType("Subscription Service")
 
@@ -162,7 +162,7 @@ def get_subscription_invoice(subscriber):
             Service.sales_invoice_id
 
         )
-        .where(Subscription.name == subscriber)
+        # .where(Subscription.name == subscriber)
         .run(as_dict=True)
     )
 
@@ -183,3 +183,67 @@ def get_subscription_invoice(subscriber):
         })
 
     return list(subscriptions.values())
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def clear_sales_invoice_ids_monthly():
+    Subscription = DocType("CLI Subscription")
+    Service = DocType("Subscription Service")
+
+    raw_data = (
+        frappe.qb.from_(Subscription)
+        .join(Service).on(Subscription.name == Service.parent)
+        .select(
+            Subscription.name,
+            Subscription.customer,
+            Service.name.as_("service_name"),  # child row identifier
+            Service.plan,
+            Service.sales_invoice_id
+        )
+        .run(as_dict=True)
+    )
+
+    subscriptions = {}
+    for row in raw_data:
+        sub_name = row["name"]
+        customer = row["customer"]
+
+        if sub_name not in subscriptions:
+            subscriptions[sub_name] = {
+                "name": sub_name,
+                "customer": customer,
+                "plans": []
+            }
+
+        subscriptions[sub_name]["plans"].append({
+            "plan": row["plan"],
+            "sales_invoice_id": row["sales_invoice_id"],
+            "service_name": row["service_name"]
+        })
+
+    # 🔹 Remove sales_invoice_id from all plans
+    for sub in subscriptions.values():
+        doc = frappe.get_doc("CLI Subscription", sub["name"])
+
+        for service in doc.service:  # child table
+            service.sales_invoice_id = None
+
+        doc.save(ignore_permissions=True)
+
+    return list(subscriptions.values())
+
+
+
